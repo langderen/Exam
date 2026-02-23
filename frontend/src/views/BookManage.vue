@@ -178,7 +178,7 @@ const route = useRoute()
 const router = useRouter()
 
 const bookId = route.params.bookId
-const uploadUrl = 'http://localhost:8080/upload/image'
+const uploadUrl = 'http://localhost:8080/api/upload/image'
 const book = ref(null)
 const questions = ref([])
 const questionTypes = ref([])

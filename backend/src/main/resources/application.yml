@@ -9,9 +9,16 @@ spring:
     url: jdbc:mysql://localhost:3306/exercise_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: 123456
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+
+upload:
+  path: D:/uploads
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
