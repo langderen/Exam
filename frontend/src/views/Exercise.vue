@@ -106,7 +106,7 @@
     
     <div class="answer-card-section" v-if="totalCount > 0">
       <AnswerCard
-        mode="practice"
+        mode="exam"
         :total="totalCount"
         :status-list="answerStatusList"
         :current-seq="currentIndex"
@@ -277,11 +277,15 @@ const submitAnswer = async () => {
 
 const jumpToQuestion = async (seq) => {
   try {
+
+    
     const bookId = route.params.bookId
     const res = await jumpToQuestionApi(bookId, seq)
     if (res.data) {
+      console.log('Question data:', res.data)
       question.value = res.data
       currentIndex.value = seq
+      console.log('Updated currentIndex to:', currentIndex.value)
       exerciseStore.saveProgress(bookId, seq)
       submitted.value = false
       userAnswer.value = ''
@@ -290,8 +294,11 @@ const jumpToQuestion = async (seq) => {
       
       const colRes = await getQuestionDetail(res.data.id, userStore.userInfo.id)
       isCollected.value = colRes.data?.isCollected === 1
+    } else {
+      console.error('jumpToQuestionApi returned null data')
     }
   } catch (error) {
+    console.error('jumpToQuestion error:', error)
     console.error(error)
   }
 }

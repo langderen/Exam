@@ -94,7 +94,7 @@ const handleJump = (seq) => {
   &.exam {
     .answer-card-items {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       gap: 8px;
       
       &.scrollable {
@@ -152,10 +152,5 @@ const handleJump = (seq) => {
     border: 2px solid #e6a23c;
     box-shadow: 0 0 8px rgba(230, 162, 60, 0.5);
   }
-}
-
-.answer-card.exam .answer-card-item {
-  width: 100%;
-  height: 40px;
 }
 </style>

@@ -36,7 +36,7 @@
       
       <div class="exam-content">
         <div class="questions-list">
-          <el-card v-for="(q, index) in questions" :key="q.id" class="question-card">
+          <el-card v-for="(q, index) in questions" :key="q.id" :id="`question-${index + 1}`" class="question-card">
             <div class="question-header">
               <span class="question-num">第 {{ index + 1 }} 题</span>
               <el-tag :type="getTypeTag(q.typeId)">{{ q.typeName }}</el-tag>
@@ -332,15 +332,19 @@ const saveCurrentAnswer = async (questionId) => {
 }
 
 const jumpToQuestion = async (seq) => {
+  console.log('Exam jumpToQuestion called with seq:', seq)
   if (!examId.value) return
   
-  try {
-    const res = await jumpToExamQuestion(examId.value, seq)
-    if (res.data) {
-      currentSeq.value = seq
-    }
-  } catch (error) {
-    console.error(error)
+  currentSeq.value = seq
+  console.log('Updated currentSeq to:', currentSeq.value)
+  
+  const element = document.getElementById(`question-${seq}`)
+  console.log('Element found:', element)
+  if (element) {
+    console.log('Scrolling to element...')
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  } else {
+    console.error('Element not found for question:', seq)
   }
 }
 
