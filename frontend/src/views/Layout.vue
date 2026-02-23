@@ -5,7 +5,7 @@
         <div class="logo">习题册刷题系统</div>
         <el-menu mode="horizontal" :default-active="activeMenu" class="nav-menu" router>
           <el-menu-item index="/home">首页</el-menu-item>
-          <el-menu-item index="/books">我的习题册</el-menu-item>
+          <el-menu-item index="/books">习题册</el-menu-item>
           <el-menu-item index="/error">错题本</el-menu-item>
           <el-menu-item index="/collection">收藏夹</el-menu-item>
         </el-menu>

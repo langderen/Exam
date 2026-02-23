@@ -29,4 +29,16 @@ public interface QuestionService {
     int countByBookId(Long bookId);
     
     Map<String, Object> getAnswerStatus(Long userId, Long bookId);
+    
+    QuestionRecord getUserQuestionRecord(Long userId, Long questionId);
+    
+    List<Question> listByBookId(Long bookId);
+    
+    void createQuestion(Question question);
+    
+    void updateQuestion(Question question);
+    
+    void deleteQuestion(Long id);
+    
+    void batchCreate(List<Question> questions);
 }

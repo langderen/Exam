@@ -77,16 +77,6 @@ public class SysUserController {
         return Result.success(users);
     }
     
-    @PutMapping("/status/{id}")
-    public Result<Void> updateUserStatus(@PathVariable Long id, @RequestParam Integer status) {
-        try {
-            sysUserService.updateStatus(id, status);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error(e.getMessage());
-        }
-    }
-    
     @DeleteMapping("/{id}")
     public Result<Void> deleteUser(@PathVariable Long id) {
         try {

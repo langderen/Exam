@@ -32,9 +32,11 @@
         
         <div class="question-content">
           <p>{{ question.content }}</p>
+          <img v-if="question.contentImage" :src="question.contentImage" class="question-image" />
         </div>
         
         <div class="question-options">
+          <img v-if="question.optionsImage" :src="question.optionsImage" class="options-image" />
           <template v-if="question.typeId === 1 || question.typeId === 3">
             <el-radio-group v-model="userAnswer" :disabled="submitted">
               <el-radio 
@@ -135,7 +137,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getBookDetail } from '@/api/book'
-import { getSequence, getRandom, submitAnswer as submitAnswerApi, getQuestionDetail, jumpToQuestion as jumpToQuestionApi, getAnswerStatus } from '@/api/question'
+import { getSequence, getRandom, submitAnswer as submitAnswerApi, getQuestionDetail, jumpToQuestion as jumpToQuestionApi, getAnswerStatus, getUserQuestionRecord } from '@/api/question'
 import { addCollection, removeCollection } from '@/api/collection'
 import { useUserStore } from '@/store/user'
 import { useExerciseStore } from '@/store/exercise'
@@ -216,6 +218,31 @@ const loadQuestion = async () => {
       question.value = res.data
       const colRes = await getQuestionDetail(res.data.id, userStore.userInfo.id)
       isCollected.value = colRes.data?.isCollected === 1
+      
+      try {
+        const recordRes = await getUserQuestionRecord(userStore.userInfo.id, res.data.id)
+        if (recordRes.data) {
+          const record = recordRes.data
+          submitted.value = record.isAnswered === 1
+          isCorrect.value = record.isCorrect === 1
+          
+          if (question.value.typeId === 2) {
+            userAnswers.value = record.answer ? record.answer.split('') : []
+          } else if (question.value.typeId === 3) {
+            if (record.answer === '正确') {
+              userAnswer.value = 'A'
+            } else if (record.answer === '错误') {
+              userAnswer.value = 'B'
+            } else {
+              userAnswer.value = record.answer || ''
+            }
+          } else {
+            userAnswer.value = record.answer || ''
+          }
+        }
+      } catch (recordError) {
+        console.log('No record found for this question')
+      }
     }
   } catch (error) {
     console.error(error)
@@ -416,9 +443,25 @@ const toggleCollection = async () => {
     padding: 15px;
     background: #f5f7fa;
     border-radius: 8px;
+    
+    .question-image {
+      max-width: 100%;
+      max-height: 400px;
+      margin-top: 15px;
+      border-radius: 4px;
+      object-fit: contain;
+    }
   }
   
   .question-options {
+    .options-image {
+      max-width: 100%;
+      max-height: 400px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      object-fit: contain;
+    }
+    
     .option-item {
       display: block;
       margin-bottom: 12px;

@@ -5,6 +5,7 @@ import com.exercise.dto.GenerateExamDTO;
 import com.exercise.dto.SubmitAnswerDTO;
 import com.exercise.dto.SubmitExamDTO;
 import com.exercise.entity.Question;
+import com.exercise.entity.QuestionRecord;
 import com.exercise.service.QuestionCollectionService;
 import com.exercise.service.QuestionService;
 import com.exercise.vo.ExamResultVO;
@@ -67,5 +68,57 @@ public class QuestionController {
             question.setIsCollected(questionCollectionService.isCollected(userId, id) ? 1 : 0);
         }
         return Result.success(question);
+    }
+    
+    @GetMapping("/record/{userId}/{questionId}")
+    public Result<QuestionRecord> getRecord(@PathVariable Long userId, @PathVariable Long questionId) {
+        QuestionRecord record = questionService.getUserQuestionRecord(userId, questionId);
+        return Result.success(record);
+    }
+    
+    @GetMapping("/list/{bookId}")
+    public Result<List<Question>> listByBook(@PathVariable Long bookId) {
+        List<Question> questions = questionService.listByBookId(bookId);
+        return Result.success(questions);
+    }
+    
+    @PostMapping("/create")
+    public Result<Void> create(@RequestBody Question question) {
+        try {
+            questionService.createQuestion(question);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    @PutMapping("/update")
+    public Result<Void> update(@RequestBody Question question) {
+        try {
+            questionService.updateQuestion(question);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id) {
+        try {
+            questionService.deleteQuestion(id);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    @PostMapping("/batch")
+    public Result<Void> batchCreate(@RequestBody List<Question> questions) {
+        try {
+            questionService.batchCreate(questions);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
 }

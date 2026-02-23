@@ -30,6 +30,7 @@
           </div>
           <div class="error-content">
             <p>{{ record.question?.content }}</p>
+            <img v-if="record.question?.contentImage" :src="record.question?.contentImage" class="question-image" />
           </div>
           <div class="error-meta">
             <span>作答时间: {{ record.doTime }}</span>
@@ -54,9 +55,11 @@
     <el-dialog v-model="detailVisible" title="题目详情" width="600px">
       <div class="detail-content" v-if="currentRecord">
         <p class="question-text">{{ currentRecord.question?.content }}</p>
+        <img v-if="currentRecord.question?.contentImage" :src="currentRecord.question?.contentImage" class="question-image" />
         <div class="options" v-if="currentRecord.question?.options">
           <p v-for="opt in parseOptions(currentRecord.question?.options)" :key="opt" class="option">{{ opt }}</p>
         </div>
+        <img v-if="currentRecord.question?.optionsImage" :src="currentRecord.question?.optionsImage" class="options-image" />
         <div class="answer-section">
           <p><strong>正确答案:</strong> {{ currentRecord.question?.answer }}</p>
           <p><strong>您的答案:</strong> {{ currentRecord.answer }}</p>
@@ -230,6 +233,14 @@ const removeError = async (record) => {
       line-height: 1.6;
       margin: 0;
     }
+    
+    .question-image {
+      max-width: 100%;
+      max-height: 400px;
+      margin-top: 15px;
+      border-radius: 4px;
+      object-fit: contain;
+    }
   }
   
   .error-meta {
@@ -257,6 +268,14 @@ const removeError = async (record) => {
     margin-bottom: 15px;
   }
   
+  .question-image {
+    max-width: 100%;
+    max-height: 400px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+  
   .options {
     margin-bottom: 15px;
     
@@ -267,6 +286,14 @@ const removeError = async (record) => {
       margin-bottom: 8px;
       color: #666;
     }
+  }
+  
+  .options-image {
+    max-width: 100%;
+    max-height: 400px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    object-fit: contain;
   }
   
   .answer-section {

@@ -21,4 +21,6 @@ public class ExamRecord {
     private Integer status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
+    
+    private String bookName;
 }

@@ -5,6 +5,7 @@ import com.exercise.dto.GenerateExamDTO;
 import com.exercise.dto.SaveAnswerDTO;
 import com.exercise.dto.SubmitExamDTO;
 import com.exercise.entity.ExamQuestion;
+import com.exercise.entity.ExamRecord;
 import com.exercise.entity.Question;
 import com.exercise.service.ExamService;
 import com.exercise.vo.ExamResultVO;
@@ -48,5 +49,11 @@ public class ExamController {
     public Result<List<ExamQuestion>> getQuestions(@PathVariable Long examId) {
         List<ExamQuestion> questions = examService.getExamQuestions(examId);
         return Result.success(questions);
+    }
+    
+    @GetMapping("/records/{userId}")
+    public Result<List<ExamRecord>> getUserRecords(@PathVariable Long userId) {
+        List<ExamRecord> records = examService.getUserExamRecords(userId);
+        return Result.success(records);
     }
 }

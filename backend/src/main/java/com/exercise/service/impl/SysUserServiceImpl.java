@@ -83,11 +83,6 @@ public class SysUserServiceImpl implements SysUserService {
     }
     
     @Override
-    public void updateStatus(Long id, Integer status) {
-        sysUserMapper.updateStatus(id, status);
-    }
-    
-    @Override
     public void deleteUser(Long id) {
         sysUserMapper.deleteById(id);
     }

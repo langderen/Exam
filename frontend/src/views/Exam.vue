@@ -42,7 +42,9 @@
               <el-tag :type="getTypeTag(q.typeId)">{{ q.typeName }}</el-tag>
             </div>
             <p class="question-content">{{ q.content }}</p>
+            <img v-if="q.contentImage" :src="q.contentImage" class="question-image" />
             
+            <img v-if="q.optionsImage" :src="q.optionsImage" class="options-image" />
             <template v-if="q.typeId === 1 || q.typeId === 3">
               <el-radio-group v-model="answers[q.id]" @change="saveCurrentAnswer(q.id)">
                 <el-radio 
@@ -112,6 +114,7 @@
             </el-tag>
           </div>
           <p class="question-content">{{ q.content }}</p>
+          <img v-if="q.contentImage" :src="q.contentImage" class="question-image" />
           <div class="answer-compare">
             <p><strong>正确答案:</strong> {{ q.correctAnswer }}</p>
             <p><strong>您的答案:</strong> {{ q.userAnswer || '未作答' }}</p>
@@ -130,7 +133,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getBookDetail } from '@/api/book'
-import { generateExam, submitExam as submitExamApi, jumpToExamQuestion, saveExamAnswer, getExamQuestions } from '@/api/exam'
+import { generateExam, submitExam as submitExamApi, jumpQuestion, saveAnswer, getExamQuestions } from '@/api/exam'
 import { getTypeList } from '@/api/type'
 import { useUserStore } from '@/store/user'
 import AnswerCard from '@/components/AnswerCard.vue'
@@ -219,7 +222,7 @@ const startExam = async () => {
     
     examId.value = res.data.examId
     questions.value = res.data.questions
-    answerStatusList.value = res.data.examQuestions
+    answerStatusList.value = []
     answers.value = {}
     multiAnswers.value = {}
     currentSeq.value = 1
@@ -276,13 +279,13 @@ const submitExam = async () => {
     const res = await submitExamApi({
       examId: examId.value,
       userId: userStore.userInfo.id,
+      bookId: book.value.id,
+      examName: `考试_${book.value.bookName}_${new Date().toLocaleString()}`,
       questionRecords
     })
     
     examResult.value = res.data
     examSubmitted.value = true
-    
-    await loadExamQuestions()
   } catch (error) {
     console.error(error)
   } finally {
@@ -314,18 +317,6 @@ const saveCurrentAnswer = async (questionId) => {
     }
     
     if (!answer) return
-    
-    const examQuestion = answerStatusList.value.find(eq => eq.questionId === questionId)
-    if (!examQuestion) return
-    
-    await saveExamAnswer({
-      examId: examId.value,
-      questionId: questionId,
-      questionSeq: examQuestion.questionSeq,
-      userAnswer: answer
-    })
-    
-    await loadExamQuestions()
   } catch (error) {
     console.error(error)
   }
@@ -342,20 +333,9 @@ const jumpToQuestion = async (seq) => {
   console.log('Element found:', element)
   if (element) {
     console.log('Scrolling to element...')
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
   } else {
     console.error('Element not found for question:', seq)
-  }
-}
-
-const loadExamQuestions = async () => {
-  if (!examId.value) return
-  
-  try {
-    const res = await getExamQuestions(examId.value)
-    answerStatusList.value = res.data || []
-  } catch (error) {
-    console.error(error)
   }
 }
 
@@ -460,6 +440,22 @@ watch(() => questions.value, () => {
     line-height: 1.6;
     color: #333;
     margin-bottom: 15px;
+  }
+  
+  .question-image {
+    max-width: 100%;
+    max-height: 400px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+  
+  .options-image {
+    max-width: 100%;
+    max-height: 400px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    object-fit: contain;
   }
   
   .option-item {

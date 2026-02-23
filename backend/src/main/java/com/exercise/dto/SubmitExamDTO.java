@@ -7,6 +7,8 @@ import java.util.List;
 public class SubmitExamDTO {
     private Long userId;
     private Long examId;
+    private Long bookId;
+    private String examName;
     private List<QuestionRecordDTO> questionRecords;
     
     @Data

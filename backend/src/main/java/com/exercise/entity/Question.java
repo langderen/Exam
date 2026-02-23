@@ -10,7 +10,9 @@ public class Question {
     private Long bookId;
     private Long typeId;
     private String content;
+    private String contentImage;
     private String options;
+    private String optionsImage;
     private String answer;
     private String analysis;
     private Integer difficulty;

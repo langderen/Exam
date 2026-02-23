@@ -26,4 +26,6 @@ public interface QuestionMapper {
     int update(Question question);
     
     int deleteById(@Param("id") Long id);
+    
+    List<Question> selectListByBookId(@Param("bookId") Long bookId);
 }

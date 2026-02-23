@@ -44,37 +44,10 @@ public class ExamServiceImpl implements ExamService {
         
         List<Question> questions = questionMapper.selectRandomByTypes(dto.getBookId(), dto.getTypeIds(), count);
         
-        ExamRecord examRecord = new ExamRecord();
-        examRecord.setUserId(dto.getUserId());
-        examRecord.setBookId(dto.getBookId());
-        examRecord.setExamName("考试_" + System.currentTimeMillis());
-        examRecord.setTotalCount(questions.size());
-        examRecord.setCorrectCount(0);
-        examRecord.setScore(BigDecimal.ZERO);
-        examRecord.setStartTime(LocalDateTime.now());
-        examRecord.setStatus(0);
-        examRecordMapper.insert(examRecord);
-        
-        List<ExamQuestion> examQuestions = new ArrayList<>();
-        for (int i = 0; i < questions.size(); i++) {
-            ExamQuestion eq = new ExamQuestion();
-            eq.setExamId(examRecord.getId());
-            eq.setQuestionId(questions.get(i).getId());
-            eq.setQuestionSeq(i + 1);
-            eq.setUserAnswer(null);
-            eq.setIsCorrect(0);
-            eq.setIsAnswered(0);
-            examQuestions.add(eq);
-        }
-        
-        if (!examQuestions.isEmpty()) {
-            examQuestionMapper.insertBatch(examQuestions);
-        }
-        
         Map<String, Object> result = new HashMap<>();
-        result.put("examId", examRecord.getId());
+        result.put("examId", null);
         result.put("questions", questions);
-        result.put("examQuestions", examQuestions);
+        result.put("examQuestions", new ArrayList<>());
         return result;
     }
     
@@ -95,23 +68,31 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public Map<String, Object> saveAnswer(SaveAnswerDTO dto) {
-        examQuestionMapper.updateAnswer(dto.getExamId(), dto.getQuestionId(), dto.getUserAnswer(), 1);
-        
-        List<ExamQuestion> examQuestions = examQuestionMapper.selectByExamId(dto.getExamId());
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("statusList", examQuestions);
-        return result;
+        return new HashMap<>();
     }
     
     @Override
     @Transactional
     public ExamResultVO submitExam(SubmitExamDTO dto) {
-        List<ExamQuestion> examQuestions = examQuestionMapper.selectByExamId(dto.getExamId());
-        int totalCount = examQuestions.size();
+        List<SubmitExamDTO.QuestionRecordDTO> questionRecords = dto.getQuestionRecords();
+        int totalCount = questionRecords.size();
         int correctCount = 0;
         
-        for (SubmitExamDTO.QuestionRecordDTO recordDTO : dto.getQuestionRecords()) {
+        ExamRecord examRecord = new ExamRecord();
+        examRecord.setUserId(dto.getUserId());
+        examRecord.setBookId(dto.getBookId());
+        examRecord.setExamName(dto.getExamName());
+        examRecord.setTotalCount(totalCount);
+        examRecord.setCorrectCount(0);
+        examRecord.setScore(BigDecimal.ZERO);
+        examRecord.setStartTime(LocalDateTime.now());
+        examRecord.setEndTime(LocalDateTime.now());
+        examRecord.setStatus(1);
+        examRecordMapper.insert(examRecord);
+        
+        List<ExamQuestion> examQuestions = new ArrayList<>();
+        for (int i = 0; i < questionRecords.size(); i++) {
+            SubmitExamDTO.QuestionRecordDTO recordDTO = questionRecords.get(i);
             Question question = questionMapper.selectById(recordDTO.getQuestionId());
             if (question == null) continue;
             
@@ -120,7 +101,18 @@ public class ExamServiceImpl implements ExamService {
                 correctCount++;
             }
             
-            examQuestionMapper.updateCorrect(dto.getExamId(), recordDTO.getQuestionId(), isCorrect ? 1 : 0);
+            ExamQuestion eq = new ExamQuestion();
+            eq.setExamId(examRecord.getId());
+            eq.setQuestionId(question.getId());
+            eq.setQuestionSeq(i + 1);
+            eq.setUserAnswer(recordDTO.getAnswer());
+            eq.setIsCorrect(isCorrect ? 1 : 0);
+            eq.setIsAnswered(1);
+            examQuestions.add(eq);
+        }
+        
+        if (!examQuestions.isEmpty()) {
+            examQuestionMapper.insertBatch(examQuestions);
         }
         
         BigDecimal score = BigDecimal.ZERO;
@@ -130,11 +122,8 @@ public class ExamServiceImpl implements ExamService {
                     .divide(new BigDecimal(totalCount), 2, RoundingMode.HALF_UP);
         }
         
-        ExamRecord examRecord = examRecordMapper.selectById(dto.getExamId());
         examRecord.setCorrectCount(correctCount);
         examRecord.setScore(score);
-        examRecord.setEndTime(LocalDateTime.now());
-        examRecord.setStatus(1);
         examRecordMapper.update(examRecord);
         
         List<ExamResultVO.QuestionResultVO> questionResults = new ArrayList<>();
@@ -154,7 +143,7 @@ public class ExamServiceImpl implements ExamService {
         }
         
         ExamResultVO vo = new ExamResultVO();
-        vo.setExamId(dto.getExamId());
+        vo.setExamId(examRecord.getId());
         vo.setTotalCount(totalCount);
         vo.setCorrectCount(correctCount);
         vo.setScore(score);
@@ -165,5 +154,10 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public List<ExamQuestion> getExamQuestions(Long examId) {
         return examQuestionMapper.selectByExamId(examId);
+    }
+    
+    @Override
+    public List<ExamRecord> getUserExamRecords(Long userId) {
+        return examRecordMapper.selectByUserId(userId);
     }
 }

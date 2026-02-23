@@ -198,4 +198,37 @@ public class QuestionServiceImpl implements QuestionService {
         result.put("statusList", records);
         return result;
     }
+    
+    @Override
+    public QuestionRecord getUserQuestionRecord(Long userId, Long questionId) {
+        return questionRecordMapper.selectByUserAndQuestion(userId, questionId);
+    }
+    
+    @Override
+    public List<Question> listByBookId(Long bookId) {
+        return questionMapper.selectListByBookId(bookId);
+    }
+    
+    @Override
+    public void createQuestion(Question question) {
+        questionMapper.insert(question);
+    }
+    
+    @Override
+    public void updateQuestion(Question question) {
+        questionMapper.update(question);
+    }
+    
+    @Override
+    public void deleteQuestion(Long id) {
+        questionMapper.deleteById(id);
+    }
+    
+    @Override
+    @Transactional
+    public void batchCreate(List<Question> questions) {
+        for (Question question : questions) {
+            questionMapper.insert(question);
+        }
+    }
 }

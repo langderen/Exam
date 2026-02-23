@@ -23,3 +23,27 @@ export function submitAnswer(data) {
 export function getQuestionDetail(id, userId) {
   return request.get(`/question/detail/${id}`, { params: { userId } })
 }
+
+export function getUserQuestionRecord(userId, questionId) {
+  return request.get(`/question/record/${userId}/${questionId}`)
+}
+
+export function getQuestionList(bookId) {
+  return request.get(`/question/list/${bookId}`)
+}
+
+export function createQuestion(data) {
+  return request.post('/question/create', data)
+}
+
+export function updateQuestion(data) {
+  return request.put('/question/update', data)
+}
+
+export function deleteQuestion(id) {
+  return request.delete(`/question/${id}`)
+}
+
+export function batchCreateQuestions(questions) {
+  return request.post('/question/batch', questions)
+}

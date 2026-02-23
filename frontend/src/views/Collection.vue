@@ -30,6 +30,7 @@
           </div>
           <div class="collection-content">
             <p>{{ col.question?.content }}</p>
+            <img v-if="col.question?.contentImage" :src="col.question?.contentImage" class="question-image" />
           </div>
           <div class="collection-meta">
             <span>收藏时间: {{ col.createTime }}</span>
@@ -201,6 +202,14 @@ const removeCollection = async (col) => {
       color: #333;
       line-height: 1.6;
       margin: 0;
+    }
+    
+    .question-image {
+      max-width: 100%;
+      max-height: 400px;
+      margin-top: 15px;
+      border-radius: 4px;
+      object-fit: contain;
     }
   }
   

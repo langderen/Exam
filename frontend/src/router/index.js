@@ -55,6 +55,12 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/Profile.vue'),
         meta: { title: '个人中心' }
+      },
+      {
+        path: 'book-manage/:bookId',
+        name: 'BookManage',
+        component: () => import('@/views/BookManage.vue'),
+        meta: { title: '习题册管理' }
       }
     ]
   }

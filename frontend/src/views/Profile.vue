@@ -76,7 +76,7 @@
             </el-table-column>
             <el-table-column label="操作" width="200">
               <template #default="{ row }">
-                <el-button type="primary" link @click="editBook(row)">编辑</el-button>
+                <el-button type="primary" link @click="goBookManage(row)">管理题目</el-button>
                 <el-button 
                   type="warning" 
                   link 
@@ -87,6 +87,23 @@
                 <el-button type="danger" link @click="removeBook(row)">删除</el-button>
               </template>
             </el-table-column>
+          </el-table>
+        </el-card>
+      </el-tab-pane>
+      
+      <el-tab-pane label="考试记录" name="exams">
+        <el-card>
+          <el-table :data="examRecords" style="width: 100%" v-loading="loadingExams">
+            <el-table-column prop="bookName" label="习题册名称" />
+            <el-table-column prop="examName" label="考试名称" />
+            <el-table-column prop="totalCount" label="总题数" width="100" />
+            <el-table-column prop="correctCount" label="正确数" width="100" />
+            <el-table-column prop="score" label="得分" width="100">
+              <template #default="{ row }">
+                <el-tag :type="getScoreTag(row.score)">{{ row.score }}分</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="考试时间" width="180" />
           </el-table>
         </el-card>
       </el-tab-pane>
@@ -153,7 +170,7 @@
       </el-tab-pane>
     </el-tabs>
     
-    <el-dialog v-model="bookDialogVisible" :title="isEdit ? '编辑习题册' : '创建习题册'" width="500px">
+    <el-dialog v-model="bookDialogVisible" title="创建习题册" width="500px">
       <el-form :model="bookForm" label-width="100px" :rules="bookRules" ref="bookFormRef">
         <el-form-item label="习题册名称" prop="bookName">
           <el-input v-model="bookForm.bookName" />
@@ -175,11 +192,14 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserInfo, updateUserInfo, updatePassword, getUserList, updateUserStatus, deleteUser } from '@/api/user'
-import { getMyBooks, createBook, updateBook, updateBookStatus, deleteBook, getAllBooks } from '@/api/book'
+import { getUserInfo, updateUserInfo, updatePassword, getUserList, deleteUser } from '@/api/user'
+import { getMyBooks, createBook, updateBookStatus, deleteBook, getAllBooks } from '@/api/book'
+import { getUserExamRecords } from '@/api/exam'
 import { useUserStore } from '@/store/user'
 
+const router = useRouter()
 const userStore = useUserStore()
 const activeTab = ref('info')
 const saving = ref(false)
@@ -219,6 +239,8 @@ const bookForm = reactive({
 const myBooks = ref([])
 const users = ref([])
 const allBooks = ref([])
+const examRecords = ref([])
+const loadingExams = ref(false)
 
 const rules = {
   nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
@@ -318,27 +340,12 @@ const showCreateDialog = () => {
   bookDialogVisible.value = true
 }
 
-const editBook = (row) => {
-  isEdit.value = true
-  bookForm.id = row.id
-  bookForm.bookName = row.bookName
-  bookForm.bookDesc = row.bookDesc
-  bookForm.isPublic = row.isPublic
-  bookForm.creatorId = row.creatorId
-  bookDialogVisible.value = true
-}
-
 const saveBook = async () => {
   try {
     await bookFormRef.value.validate()
     savingBook.value = true
-    if (isEdit.value) {
-      await updateBook(bookForm)
-      ElMessage.success('修改成功')
-    } else {
-      await createBook(bookForm)
-      ElMessage.success('创建成功')
-    }
+    await createBook(bookForm)
+    ElMessage.success('创建成功')
     bookDialogVisible.value = false
     loadMyBooks()
   } catch (error) {
@@ -376,6 +383,10 @@ const removeBook = async (row) => {
   }
 }
 
+const goBookManage = (row) => {
+  router.push(`/book-manage/${row.id}`)
+}
+
 const loadUsers = async () => {
   try {
     const res = await getUserList()
@@ -409,6 +420,25 @@ const loadAllBooks = async () => {
   }
 }
 
+const loadExamRecords = async () => {
+  loadingExams.value = true
+  try {
+    const res = await getUserExamRecords(userStore.userInfo.id)
+    examRecords.value = res.data
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loadingExams.value = false
+  }
+}
+
+const getScoreTag = (score) => {
+  if (score >= 90) return 'success'
+  if (score >= 80) return ''
+  if (score >= 60) return 'warning'
+  return 'danger'
+}
+
 const toggleAllBookStatus = async (row) => {
   try {
     const newStatus = row.status === 1 ? 0 : 1
@@ -436,12 +466,14 @@ const removeAllBook = async (row) => {
 }
 
 onMounted(() => {
-  loadUserInfo()
+  loadUserInfo().then(() => {
+    if (userInfo.role === 'admin') {
+      loadUsers()
+      loadAllBooks()
+    }
+  })
   loadMyBooks()
-  if (userStore.userInfo.role === 'admin') {
-    loadUsers()
-    loadAllBooks()
-  }
+  loadExamRecords()
 })
 </script>
 

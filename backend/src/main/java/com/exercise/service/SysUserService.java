@@ -20,7 +20,5 @@ public interface SysUserService {
     
     List<SysUser> listUsers(String role);
     
-    void updateStatus(Long id, Integer status);
-    
     void deleteUser(Long id);
 }

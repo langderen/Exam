@@ -28,7 +28,7 @@
             <div class="book-actions">
               <el-button type="primary" @click="goToExercise(book)">顺序刷题</el-button>
               <el-button type="success" @click="goToRandom(book)">随机刷题</el-button>
-              <el-button type="warning" @click="goToExam(book)">开始考试</el-button>
+              <el-button type="warning" @click="goToExam(book)">模拟考试</el-button>
             </div>
           </el-card>
         </el-col>

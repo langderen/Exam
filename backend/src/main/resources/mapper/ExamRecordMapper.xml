@@ -30,4 +30,12 @@
         SET total_count = #{totalCount}, correct_count = #{correctCount}, score = #{score}, end_time = #{endTime}, status = #{status}
         WHERE id = #{id}
     </update>
+    
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT er.*, eb.book_name
+        FROM exam_record er
+        LEFT JOIN exercise_book eb ON er.book_id = eb.id
+        WHERE er.user_id = #{userId} AND er.status = 1
+        ORDER BY er.create_time DESC
+    </select>
 </mapper>
