@@ -42,7 +42,7 @@
         LEFT JOIN exercise_book eb ON q.book_id = eb.id
         WHERE q.book_id = #{bookId}
         ORDER BY q.id ASC
-        LIMIT #{seq} - 1, 1
+        LIMIT #{offset}, 1
     </select>
     
     <select id="selectSequence" resultMap="BaseResultMap">

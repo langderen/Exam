@@ -53,12 +53,16 @@ const getItemClass = (seq) => {
   if (!status) {
     classes.push('unanswered')
   } else if (status.isAnswered === 1 || status.is_answered === 1) {
-    if (status.isCorrect === 1 || status.is_correct === 1) {
-      classes.push('correct')
-    } else if (status.isCorrect === 0 || status.is_correct === 0) {
-      classes.push('wrong')
-    } else {
+    if (props.mode === 'exam') {
       classes.push('answered')
+    } else {
+      if (status.isCorrect === 1 || status.is_correct === 1) {
+        classes.push('correct')
+      } else if (status.isCorrect === 0 || status.is_correct === 0) {
+        classes.push('wrong')
+      } else {
+        classes.push('answered')
+      }
     }
   } else {
     classes.push('unanswered')

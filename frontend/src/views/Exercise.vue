@@ -13,11 +13,12 @@
       </div>
     </div>
     
-    <div class="question-section" v-if="question">
-      <el-card class="question-card">
-        <div class="question-header">
-          <el-tag :type="getTypeTag(question.typeId)">{{ question.typeName }}</el-tag>
-          <el-tag :type="getDifficultyTag(question.difficulty)" class="ml-10">
+    <div class="exercise-content" v-if="question">
+      <div class="question-section">
+        <el-card class="question-card">
+          <div class="question-header">
+            <el-tag :type="getTypeTag(question.typeId)">{{ question.typeName }}</el-tag>
+            <el-tag :type="getDifficultyTag(question.difficulty)" class="ml-10">
             {{ getDifficultyText(question.difficulty) }}
           </el-tag>
           <el-button 
@@ -98,20 +99,33 @@
           >
             提交答案
           </el-button>
-          <el-button v-else type="success" @click="nextQuestion">继续刷题</el-button>
-          <el-button @click="nextQuestion" :disabled="currentIndex >= totalCount">下一题</el-button>
+          <el-button 
+            v-else 
+            type="success" 
+            @click="nextQuestion"
+          >
+            下一题
+          </el-button>
+          <el-button 
+            v-if="!submitted"
+            @click="nextQuestion"
+            :disabled="currentIndex >= totalCount"
+          >
+            下一题
+          </el-button>
         </div>
       </el-card>
-    </div>
-    
-    <div class="answer-card-section" v-if="totalCount > 0">
-      <AnswerCard
-        mode="exam"
-        :total="totalCount"
-        :status-list="answerStatusList"
-        :current-seq="currentIndex"
-        @jump="jumpToQuestion"
-      />
+      </div>
+      
+      <div class="answer-card-sidebar">
+        <AnswerCard
+          mode="exam"
+          :total="totalCount"
+          :status-list="answerStatusList"
+          :current-seq="currentIndex"
+          @jump="jumpToQuestion"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -277,26 +291,13 @@ const submitAnswer = async () => {
 
 const jumpToQuestion = async (seq) => {
   try {
-
-    
-    const bookId = route.params.bookId
-    const res = await jumpToQuestionApi(bookId, seq)
-    if (res.data) {
-      console.log('Question data:', res.data)
-      question.value = res.data
-      currentIndex.value = seq
-      console.log('Updated currentIndex to:', currentIndex.value)
-      exerciseStore.saveProgress(bookId, seq)
-      submitted.value = false
-      userAnswer.value = ''
-      userAnswers.value = []
-      isCorrect.value = false
-      
-      const colRes = await getQuestionDetail(res.data.id, userStore.userInfo.id)
-      isCollected.value = colRes.data?.isCollected === 1
-    } else {
-      console.error('jumpToQuestionApi returned null data')
-    }
+    currentIndex.value = seq
+    exerciseStore.saveProgress(route.params.bookId, seq)
+    submitted.value = false
+    userAnswer.value = ''
+    userAnswers.value = []
+    isCorrect.value = false
+    await loadQuestion()
   } catch (error) {
     console.error('jumpToQuestion error:', error)
     console.error(error)
@@ -380,6 +381,22 @@ const toggleCollection = async () => {
   }
 }
 
+.exercise-content {
+  display: flex;
+  gap: 20px;
+}
+
+.question-section {
+  flex: 1;
+}
+
+.answer-card-sidebar {
+  width: 200px;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+}
+
 .question-card {
   .question-header {
     display: flex;
@@ -460,9 +477,5 @@ const toggleCollection = async () => {
     padding-top: 20px;
     border-top: 1px solid #eee;
   }
-}
-
-.answer-card-section {
-  margin-top: 20px;
 }
 </style>
