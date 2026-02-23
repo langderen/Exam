@@ -63,7 +63,7 @@
           </el-upload>
           <el-button v-if="questionForm.contentImage" type="danger" link @click="questionForm.contentImage = ''">删除图片</el-button>
         </el-form-item>
-        <el-form-item label="选项" prop="options" v-if="questionForm.typeId !== 4">
+        <el-form-item label="选项" prop="options" v-if="questionForm.typeId !== 4 && questionForm.typeId !== 3">
           <div class="options-editor">
             <div v-for="(opt, index) in optionList" :key="index" class="option-row">
               <el-input v-model="optionList[index]" :placeholder="`选项${String.fromCharCode(65 + index)}`" />

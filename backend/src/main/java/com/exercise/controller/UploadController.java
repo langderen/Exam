@@ -14,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/upload")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class UploadController {
     
     @Value("${upload.path:D:/uploads}")

@@ -273,6 +273,8 @@ const loadUserInfo = async () => {
   try {
     const res = await getUserInfo(userStore.userInfo.id)
     Object.assign(userInfo, res.data)
+    userInfo.email = userInfo.email || ''
+    userInfo.phone = userInfo.phone || ''
   } catch (error) {
     console.error(error)
   }
