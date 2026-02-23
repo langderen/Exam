@@ -54,6 +54,7 @@
           <el-upload
             class="image-uploader"
             :action="uploadUrl"
+            name="file"
             :show-file-list="false"
             :on-success="handleContentImageSuccess"
             :before-upload="beforeImageUpload"
@@ -76,6 +77,7 @@
           <el-upload
             class="image-uploader"
             :action="uploadUrl"
+            name="file"
             :show-file-list="false"
             :on-success="handleOptionsImageSuccess"
             :before-upload="beforeImageUpload"
