@@ -5,6 +5,7 @@ import com.exercise.mapper.ExerciseBookMapper;
 import com.exercise.service.ExerciseBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -35,5 +36,38 @@ public class ExerciseBookServiceImpl implements ExerciseBookService {
     @Override
     public ExerciseBook getById(Long id) {
         return exerciseBookMapper.selectById(id);
+    }
+    
+    @Override
+    public List<ExerciseBook> getMyBooks(Long userId) {
+        return exerciseBookMapper.selectByCreatorId(userId);
+    }
+    
+    @Override
+    public void createBook(ExerciseBook book) {
+        book.setCreateTime(LocalDateTime.now());
+        book.setStatus(1);
+        book.setIsPublic(1);
+        exerciseBookMapper.insert(book);
+    }
+    
+    @Override
+    public void updateBook(ExerciseBook book) {
+        exerciseBookMapper.update(book);
+    }
+    
+    @Override
+    public void updateStatus(Long id, Integer status) {
+        exerciseBookMapper.updateStatus(id, status);
+    }
+    
+    @Override
+    public void deleteBook(Long id) {
+        exerciseBookMapper.deleteById(id);
+    }
+    
+    @Override
+    public List<ExerciseBook> getAllBooks() {
+        return exerciseBookMapper.selectAll();
     }
 }

@@ -7,6 +7,10 @@
         <result column="username" property="username"/>
         <result column="password" property="password"/>
         <result column="nickname" property="nickname"/>
+        <result column="role" property="role"/>
+        <result column="avatar" property="avatar"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -19,9 +23,19 @@
         SELECT * FROM sys_user WHERE id = #{id}
     </select>
     
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        <where>
+            <if test="role != null and role != ''">
+                AND role = #{role}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+    
     <insert id="insert" parameterType="com.exercise.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_user (username, password, nickname)
-        VALUES (#{username}, #{password}, #{nickname})
+        INSERT INTO sys_user (username, password, nickname, role, email, phone, create_time)
+        VALUES (#{username}, #{password}, #{nickname}, #{role}, #{email}, #{phone}, #{createTime})
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.SysUser">
@@ -32,4 +46,28 @@
         </set>
         WHERE id = #{id}
     </update>
+    
+    <update id="updateInfo" parameterType="com.exercise.entity.SysUser">
+        UPDATE sys_user
+        <set>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updatePassword">
+        UPDATE sys_user SET password = #{password}, update_time = NOW() WHERE id = #{id}
+    </update>
+    
+    <update id="updateStatus">
+        UPDATE sys_user SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM sys_user WHERE id = #{id}
+    </delete>
 </mapper>

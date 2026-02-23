@@ -9,6 +9,9 @@
         <result column="type_id" property="typeId"/>
         <result column="create_time" property="createTime"/>
         <result column="status" property="status"/>
+        <result column="creator_id" property="creatorId"/>
+        <result column="is_public" property="isPublic"/>
+        <result column="creator_name" property="creatorName"/>
     </resultMap>
     
     <resultMap id="DetailResultMap" type="com.exercise.entity.ExerciseBook" extends="BaseResultMap">
@@ -18,14 +21,16 @@
     </resultMap>
     
     <select id="selectList" resultMap="BaseResultMap">
-        SELECT * FROM exercise_book
+        SELECT b.*, u.nickname as creator_name
+        FROM exercise_book b
+        LEFT JOIN sys_user u ON b.creator_id = u.id
         <where>
-            status = 1
+            b.status = 1 AND (b.is_public = 1 OR b.creator_id IS NULL)
             <if test="bookName != null and bookName != ''">
-                AND book_name LIKE CONCAT('%', #{bookName}, '%')
+                AND b.book_name LIKE CONCAT('%', #{bookName}, '%')
             </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY b.create_time DESC
     </select>
     
     <select id="selectDetailById" resultMap="DetailResultMap">
@@ -41,9 +46,24 @@
         SELECT * FROM exercise_book WHERE id = #{id}
     </select>
     
+    <select id="selectByCreatorId" resultMap="BaseResultMap">
+        SELECT b.*, u.nickname as creator_name
+        FROM exercise_book b
+        LEFT JOIN sys_user u ON b.creator_id = u.id
+        WHERE b.creator_id = #{creatorId}
+        ORDER BY b.create_time DESC
+    </select>
+    
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT b.*, u.nickname as creator_name
+        FROM exercise_book b
+        LEFT JOIN sys_user u ON b.creator_id = u.id
+        ORDER BY b.create_time DESC
+    </select>
+    
     <insert id="insert" parameterType="com.exercise.entity.ExerciseBook" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO exercise_book (book_name, book_desc, type_id, status)
-        VALUES (#{bookName}, #{bookDesc}, #{typeId}, #{status})
+        INSERT INTO exercise_book (book_name, book_desc, type_id, status, creator_id, is_public, create_time)
+        VALUES (#{bookName}, #{bookDesc}, #{typeId}, #{status}, #{creatorId}, #{isPublic}, #{createTime})
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.ExerciseBook">
@@ -52,8 +72,13 @@
             <if test="bookName != null">book_name = #{bookName},</if>
             <if test="bookDesc != null">book_desc = #{bookDesc},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="isPublic != null">is_public = #{isPublic},</if>
         </set>
         WHERE id = #{id}
+    </update>
+    
+    <update id="updateStatus">
+        UPDATE exercise_book SET status = #{status} WHERE id = #{id}
     </update>
     
     <delete id="deleteById">

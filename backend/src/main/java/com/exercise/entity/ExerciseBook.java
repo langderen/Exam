@@ -13,9 +13,13 @@ public class ExerciseBook {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     private Integer status;
+    private Long creatorId;
+    private Integer isPublic;
     
     private Integer totalCount;
     private Integer doneCount;
     private Integer correctCount;
     private Double correctRate;
+    
+    private String creatorName;
 }

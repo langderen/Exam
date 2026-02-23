@@ -18,4 +18,10 @@ public interface ExerciseBookMapper {
     int update(ExerciseBook book);
     
     int deleteById(@Param("id") Long id);
+    
+    List<ExerciseBook> selectByCreatorId(@Param("creatorId") Long creatorId);
+    
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
+    
+    List<ExerciseBook> selectAll();
 }

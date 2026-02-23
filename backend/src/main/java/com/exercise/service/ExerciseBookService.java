@@ -10,4 +10,16 @@ public interface ExerciseBookService {
     ExerciseBook getDetailById(Long id, Long userId);
     
     ExerciseBook getById(Long id);
+    
+    List<ExerciseBook> getMyBooks(Long userId);
+    
+    void createBook(ExerciseBook book);
+    
+    void updateBook(ExerciseBook book);
+    
+    void updateStatus(Long id, Integer status);
+    
+    void deleteBook(Long id);
+    
+    List<ExerciseBook> getAllBooks();
 }

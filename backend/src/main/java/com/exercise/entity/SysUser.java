@@ -10,6 +10,10 @@ public class SysUser {
     private String username;
     private String password;
     private String nickname;
+    private String role;
+    private String avatar;
+    private String email;
+    private String phone;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

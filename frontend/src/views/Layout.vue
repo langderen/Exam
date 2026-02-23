@@ -10,8 +10,18 @@
           <el-menu-item index="/collection">收藏夹</el-menu-item>
         </el-menu>
         <div class="user-info">
-          <span>{{ userStore.userInfo?.nickname || userStore.userInfo?.username }}</span>
-          <el-button type="text" @click="handleLogout">退出</el-button>
+          <el-dropdown>
+            <span class="user-dropdown">
+              {{ userStore.userInfo?.nickname || userStore.userInfo?.username }}
+              <el-icon><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="goProfile">个人中心</el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </el-header>
       <el-main class="main">
@@ -25,12 +35,17 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { ArrowDown } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
+
+const goProfile = () => {
+  router.push('/profile')
+}
 
 const handleLogout = () => {
   userStore.logout()
@@ -72,9 +87,17 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.user-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: #666;
   
-  span {
-    color: #666;
+  &:hover {
+    color: #409eff;
   }
 }
 
