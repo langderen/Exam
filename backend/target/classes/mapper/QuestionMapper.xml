@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exercise.mapper.QuestionMapper">
+    
+    <resultMap id="BaseResultMap" type="com.exercise.entity.Question">
+        <id column="id" property="id"/>
+        <result column="book_id" property="bookId"/>
+        <result column="type_id" property="typeId"/>
+        <result column="content" property="content"/>
+        <result column="options" property="options"/>
+        <result column="answer" property="answer"/>
+        <result column="analysis" property="analysis"/>
+        <result column="difficulty" property="difficulty"/>
+        <result column="create_time" property="createTime"/>
+        <result column="type_name" property="typeName"/>
+        <result column="book_name" property="bookName"/>
+        <result column="is_collected" property="isCollected"/>
+        <result column="error_count" property="errorCount"/>
+    </resultMap>
+    
+    <select id="selectByBookId" resultMap="BaseResultMap">
+        SELECT q.*, qt.type_name, eb.book_name
+        FROM question q
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE q.book_id = #{bookId}
+        ORDER BY q.id ASC
+    </select>
+    
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT q.*, qt.type_name, eb.book_name
+        FROM question q
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE q.id = #{id}
+    </select>
+    
+    <select id="selectBySeq" resultMap="BaseResultMap">
+        SELECT q.*, qt.type_name, eb.book_name
+        FROM question q
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE q.book_id = #{bookId}
+        ORDER BY q.id ASC
+        LIMIT #{seq} - 1, 1
+    </select>
+    
+    <select id="selectSequence" resultMap="BaseResultMap">
+        SELECT q.*, qt.type_name, eb.book_name
+        FROM question q
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE q.book_id = #{bookId}
+        ORDER BY q.id ASC
+        LIMIT #{offset}, 1
+    </select>
+    
+    <select id="selectRandom" resultMap="BaseResultMap">
+        SELECT q.*, qt.type_name, eb.book_name
+        FROM question q
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE q.book_id = #{bookId}
+        AND q.id NOT IN (
+            SELECT question_id FROM question_record WHERE user_id = #{userId}
+        )
+        ORDER BY RAND()
+        LIMIT 1
+    </select>
+    
+    <select id="selectRandomByTypes" resultMap="BaseResultMap">
+        SELECT q.*, qt.type_name, eb.book_name
+        FROM question q
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE q.book_id = #{bookId}
+        <if test="typeIds != null and typeIds.size() > 0">
+            AND q.type_id IN
+            <foreach collection="typeIds" item="typeId" open="(" separator="," close=")">
+                #{typeId}
+            </foreach>
+        </if>
+        ORDER BY RAND()
+        LIMIT #{count}
+    </select>
+    
+    <select id="countByBookId" resultType="int">
+        SELECT COUNT(*) FROM question WHERE book_id = #{bookId}
+    </select>
+    
+    <insert id="insert" parameterType="com.exercise.entity.Question" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO question (book_id, type_id, content, options, answer, analysis, difficulty)
+        VALUES (#{bookId}, #{typeId}, #{content}, #{options}, #{answer}, #{analysis}, #{difficulty})
+    </insert>
+    
+    <update id="update" parameterType="com.exercise.entity.Question">
+        UPDATE question
+        <set>
+            <if test="content != null">content = #{content},</if>
+            <if test="options != null">options = #{options},</if>
+            <if test="answer != null">answer = #{answer},</if>
+            <if test="analysis != null">analysis = #{analysis},</if>
+            <if test="difficulty != null">difficulty = #{difficulty},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM question WHERE id = #{id}
+    </delete>
+</mapper>

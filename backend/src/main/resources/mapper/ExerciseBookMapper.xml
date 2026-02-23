@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exercise.mapper.ExerciseBookMapper">
+    
+    <resultMap id="BaseResultMap" type="com.exercise.entity.ExerciseBook">
+        <id column="id" property="id"/>
+        <result column="book_name" property="bookName"/>
+        <result column="book_desc" property="bookDesc"/>
+        <result column="type_id" property="typeId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    
+    <resultMap id="DetailResultMap" type="com.exercise.entity.ExerciseBook" extends="BaseResultMap">
+        <result column="total_count" property="totalCount"/>
+        <result column="done_count" property="doneCount"/>
+        <result column="correct_count" property="correctCount"/>
+    </resultMap>
+    
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM exercise_book
+        <where>
+            status = 1
+            <if test="bookName != null and bookName != ''">
+                AND book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="selectDetailById" resultMap="DetailResultMap">
+        SELECT b.*,
+               (SELECT COUNT(*) FROM question WHERE book_id = b.id) as total_count,
+               (SELECT COUNT(DISTINCT question_id) FROM question_record WHERE book_id = b.id AND user_id = #{userId}) as done_count,
+               (SELECT COUNT(*) FROM question_record WHERE book_id = b.id AND user_id = #{userId} AND is_correct = 1) as correct_count
+        FROM exercise_book b
+        WHERE b.id = #{id}
+    </select>
+    
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM exercise_book WHERE id = #{id}
+    </select>
+    
+    <insert id="insert" parameterType="com.exercise.entity.ExerciseBook" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exercise_book (book_name, book_desc, type_id, status)
+        VALUES (#{bookName}, #{bookDesc}, #{typeId}, #{status})
+    </insert>
+    
+    <update id="update" parameterType="com.exercise.entity.ExerciseBook">
+        UPDATE exercise_book
+        <set>
+            <if test="bookName != null">book_name = #{bookName},</if>
+            <if test="bookDesc != null">book_desc = #{bookDesc},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM exercise_book WHERE id = #{id}
+    </delete>
+</mapper>

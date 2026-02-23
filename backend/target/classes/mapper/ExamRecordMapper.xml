@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exercise.mapper.ExamRecordMapper">
+    
+    <resultMap id="BaseResultMap" type="com.exercise.entity.ExamRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="book_id" property="bookId"/>
+        <result column="exam_name" property="examName"/>
+        <result column="total_count" property="totalCount"/>
+        <result column="correct_count" property="correctCount"/>
+        <result column="score" property="score"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <insert id="insert" parameterType="com.exercise.entity.ExamRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exam_record (user_id, book_id, exam_name, total_count, correct_count, score, start_time, status)
+        VALUES (#{userId}, #{bookId}, #{examName}, #{totalCount}, #{correctCount}, #{score}, #{startTime}, #{status})
+    </insert>
+    
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM exam_record WHERE id = #{id}
+    </select>
+    
+    <update id="update" parameterType="com.exercise.entity.ExamRecord">
+        UPDATE exam_record
+        SET total_count = #{totalCount}, correct_count = #{correctCount}, score = #{score}, end_time = #{endTime}, status = #{status}
+        WHERE id = #{id}
+    </update>
+</mapper>

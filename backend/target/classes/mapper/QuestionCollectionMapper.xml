@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exercise.mapper.QuestionCollectionMapper">
+    
+    <resultMap id="BaseResultMap" type="com.exercise.entity.QuestionCollection">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="question_id" property="questionId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <resultMap id="DetailResultMap" type="com.exercise.entity.QuestionCollection" extends="BaseResultMap">
+        <association property="question" javaType="com.exercise.entity.Question">
+            <id column="q_id" property="id"/>
+            <result column="q_book_id" property="bookId"/>
+            <result column="q_type_id" property="typeId"/>
+            <result column="q_content" property="content"/>
+            <result column="q_options" property="options"/>
+            <result column="q_answer" property="answer"/>
+            <result column="q_analysis" property="analysis"/>
+            <result column="q_difficulty" property="difficulty"/>
+            <result column="q_type_name" property="typeName"/>
+            <result column="q_book_name" property="bookName"/>
+        </association>
+    </resultMap>
+    
+    <insert id="insert" parameterType="com.exercise.entity.QuestionCollection">
+        INSERT INTO collection (user_id, question_id)
+        VALUES (#{userId}, #{questionId})
+    </insert>
+    
+    <delete id="deleteByUserAndQuestion">
+        DELETE FROM collection WHERE user_id = #{userId} AND question_id = #{questionId}
+    </delete>
+    
+    <select id="selectByUserId" resultMap="DetailResultMap">
+        SELECT c.*, 
+               q.id as q_id, q.book_id as q_book_id, q.type_id as q_type_id,
+               q.content as q_content, q.options as q_options, q.answer as q_answer,
+               q.analysis as q_analysis, q.difficulty as q_difficulty,
+               qt.type_name as q_type_name, eb.book_name as q_book_name
+        FROM collection c
+        LEFT JOIN question q ON c.question_id = q.id
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE c.user_id = #{userId}
+        <if test="bookId != null">
+            AND q.book_id = #{bookId}
+        </if>
+        <if test="typeId != null">
+            AND q.type_id = #{typeId}
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+    
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM collection c
+        LEFT JOIN question q ON c.question_id = q.id
+        WHERE c.user_id = #{userId}
+        <if test="bookId != null">
+            AND q.book_id = #{bookId}
+        </if>
+        <if test="typeId != null">
+            AND q.type_id = #{typeId}
+        </if>
+    </select>
+    
+    <select id="selectByUserAndQuestion" resultMap="BaseResultMap">
+        SELECT * FROM collection WHERE user_id = #{userId} AND question_id = #{questionId}
+    </select>
+</mapper>
