@@ -42,7 +42,7 @@ public class UploadController {
             String datePath = sdf.format(new Date());
             
             String fileName = UUID.randomUUID().toString() + extension;
-            String relativePath = "/api/images/" + datePath + "/" + fileName;
+            String relativePath = "/images/" + datePath + "/" + fileName;
             String fullPath = uploadPath + relativePath;
             
             File destFile = new File(fullPath);
