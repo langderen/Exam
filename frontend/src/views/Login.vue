@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-content">
       <div class="rick-wrapper">
-        <div class="rick">
+        <div class="rick" :class="{ 'shake-head': isShakingHead }">
           <div class="backhairs"></div>
           <div class="hairs"></div>
           <div class="body">
@@ -10,8 +10,8 @@
             <div class="pants"></div>
             <div class="shirtLeft"></div>
             <div class="shirtRight"></div>
-            <div class="leftArm"></div>
-            <div class="rightArm"></div>
+            <div class="leftArm" :class="{ 'cover-eyes': isPasswordFocused }"></div>
+            <div class="rightArm" :class="{ 'cover-eyes': isPasswordFocused }"></div>
             <div class="shoes">
               <div class="leftShoe"></div>
               <div class="rightShoe"></div>
@@ -90,6 +90,7 @@ const userStore = useUserStore()
 const formRef = ref(null)
 const loading = ref(false)
 const isPasswordFocused = ref(false)
+const isShakingHead = ref(false)
 const rightPupil = ref(null)
 const leftPupil = ref(null)
 const leftEyelid = ref(null)
@@ -176,6 +177,10 @@ const handleLogin = async () => {
     router.push('/home')
   } catch (error) {
     console.error(error)
+    isShakingHead.value = true
+    setTimeout(() => {
+      isShakingHead.value = false
+    }, 600)
   } finally {
     loading.value = false
   }
@@ -214,12 +219,29 @@ const handleLogin = async () => {
   justify-content: center;
 }
 
+@keyframes shakeHead {
+  0%, 100% { transform: scale(0.5) rotate(0deg); }
+  10% { transform: scale(0.5) rotate(-8deg); }
+  20% { transform: scale(0.5) rotate(8deg); }
+  30% { transform: scale(0.5) rotate(-8deg); }
+  40% { transform: scale(0.5) rotate(8deg); }
+  50% { transform: scale(0.5) rotate(-6deg); }
+  60% { transform: scale(0.5) rotate(6deg); }
+  70% { transform: scale(0.5) rotate(-4deg); }
+  80% { transform: scale(0.5) rotate(4deg); }
+  90% { transform: scale(0.5) rotate(-2deg); }
+}
+
 .rick {
   position: relative;
   width: 400px;
   height: 600px;
   transform: scale(0.5);
   transform-origin: center center;
+  
+  &.shake-head {
+    animation: shakeHead 0.6s ease-in-out;
+  }
   
   .head {
     position: absolute;
@@ -233,6 +255,7 @@ const handleLogin = async () => {
     border-width: 2px;
     border-color: #333f42;
     border-style: solid;
+    z-index: 0;
     
     &:after {
       content: '';
@@ -468,6 +491,7 @@ const handleLogin = async () => {
     top: 385px;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 60;
     
     .shirtLeft {
       width: 50px;
@@ -477,7 +501,7 @@ const handleLogin = async () => {
       background-color: #fff;
       border-top-left-radius: 50px;
       border-bottom-right-radius: 50px;
-      box-shadow: 3px 3px 0 #333f42;
+      border: 2px solid #333f42;
       
       &:before {
         position: absolute;
@@ -501,7 +525,7 @@ const handleLogin = async () => {
       background-color: #fff;
       border-top-right-radius: 50px;
       border-bottom-left-radius: 50px;
-      box-shadow: 4px 0px 0 #333f42;
+      border: 2px solid #333f42;
       
       &:before {
         position: absolute;
@@ -526,6 +550,13 @@ const handleLogin = async () => {
       background-color: #fff;
       border-top-left-radius: 50px;
       box-shadow: 0px 1px 0px 3px #333f42;
+      transform-origin: 13px -35px;
+      transition: transform 0.3s ease-in-out;
+      z-index: 100;
+      
+      &.cover-eyes {
+        transform: rotate(-170deg) translateX(-15px) translateY(-90px);
+      }
       
       &:after {
         position: absolute;
@@ -549,6 +580,13 @@ const handleLogin = async () => {
       background-color: #fff;
       border-top-right-radius: 50px;
       box-shadow: 1px -1px 0px 3px #333f42;
+      transform-origin: 13px -35px;;
+      transition: transform 0.3s ease-in-out;
+      z-index: 100;
+      
+      &.cover-eyes {
+        transform: rotate(170deg) translateX(15px) translateY(-90px);
+      }
       
       &:after {
         position: absolute;
