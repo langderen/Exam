@@ -20,9 +20,11 @@
           <div class="head">
             <div class="eyes" :class="{ 'closed': isPasswordFocused }">
               <div class="left-eye">
+                <div class="eyelid" ref="leftEyelid"></div>
                 <div class="pupil" ref="leftPupil"></div>
               </div>
               <div class="right-eye">
+                <div class="eyelid" ref="rightEyelid"></div>
                 <div class="pupil" ref="rightPupil"></div>
               </div>
               
@@ -90,6 +92,8 @@ const loading = ref(false)
 const isPasswordFocused = ref(false)
 const rightPupil = ref(null)
 const leftPupil = ref(null)
+const leftEyelid = ref(null)
+const rightEyelid = ref(null)
 
 const form = reactive({
   username: '',
@@ -124,7 +128,8 @@ const handleMouseMove = (event) => {
   
   eyes.forEach((eye) => {
     const pupil = eye.querySelector('.pupil')
-    if (!pupil) return
+    const eyelid = eye.querySelector('.eyelid')
+    if (!pupil || !eyelid) return
     
     const rect = eye.getBoundingClientRect()
     const eyeCenterX = rect.left + rect.width / 2
@@ -140,6 +145,13 @@ const handleMouseMove = (event) => {
     const pupilY = Math.sin(angle) * distance
     
     pupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`
+    
+    if (pupilY < 0) {
+      const eyelidOffset = Math.min(Math.abs(pupilY), 20)
+      eyelid.style.transform = `translateY(-${eyelidOffset}px)`
+    } else {
+      eyelid.style.transform = 'translateY(0)'
+    }
   })
 }
 
@@ -274,9 +286,8 @@ const handleLogin = async () => {
         background-color: #fff;
         overflow: hidden;
         
-        &:before {
+        .eyelid {
           position: absolute;
-          content: '';
           box-sizing: border-box;
           width: 76px;
           height: 40px;
@@ -287,6 +298,7 @@ const handleLogin = async () => {
           top: 0;
           left: 0;
           z-index: 1;
+          transition: transform 0.08s ease-out;
         }
         
         .pupil {
