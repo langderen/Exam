@@ -555,7 +555,7 @@ const handleLogin = async () => {
       z-index: 100;
       
       &.cover-eyes {
-        transform: rotate(-170deg) translateX(-15px) translateY(-90px);
+        transform: rotate(-170deg) translateX(-15px) translateY(-95px);
       }
       
       &:after {
@@ -585,7 +585,7 @@ const handleLogin = async () => {
       z-index: 100;
       
       &.cover-eyes {
-        transform: rotate(170deg) translateX(15px) translateY(-90px);
+        transform: rotate(170deg) translateX(15px) translateY(-95px);
       }
       
       &:after {
