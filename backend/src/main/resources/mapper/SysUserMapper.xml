@@ -6,11 +6,11 @@
         <id column="id" property="id"/>
         <result column="username" property="username"/>
         <result column="password" property="password"/>
-        <result column="nickname" property="nickname"/>
         <result column="role" property="role"/>
         <result column="avatar" property="avatar"/>
         <result column="email" property="email"/>
         <result column="phone" property="phone"/>
+        <result column="balance" property="balance"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -21,6 +21,10 @@
     
     <select id="selectById" resultMap="BaseResultMap">
         SELECT * FROM sys_user WHERE id = #{id}
+    </select>
+    
+    <select id="selectByEmail" resultMap="BaseResultMap">
+        SELECT * FROM sys_user WHERE email = #{email}
     </select>
     
     <select id="selectList" resultMap="BaseResultMap">
@@ -34,14 +38,13 @@
     </select>
     
     <insert id="insert" parameterType="com.exercise.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_user (username, password, nickname, role, email, phone, create_time)
-        VALUES (#{username}, #{password}, #{nickname}, #{role}, #{email}, #{phone}, #{createTime})
+        INSERT INTO sys_user (username, password, role, email, phone, create_time)
+        VALUES (#{username}, #{password}, #{role}, #{email}, #{phone}, #{createTime})
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.SysUser">
         UPDATE sys_user
         <set>
-            <if test="nickname != null">nickname = #{nickname},</if>
             <if test="password != null">password = #{password},</if>
         </set>
         WHERE id = #{id}
@@ -50,7 +53,6 @@
     <update id="updateInfo" parameterType="com.exercise.entity.SysUser">
         UPDATE sys_user
         <set>
-            <if test="nickname != null">nickname = #{nickname},</if>
             <if test="avatar != null">avatar = #{avatar},</if>
             <if test="email != null">email = #{email},</if>
             <if test="phone != null">phone = #{phone},</if>
@@ -61,6 +63,10 @@
     
     <update id="updatePassword">
         UPDATE sys_user SET password = #{password}, update_time = NOW() WHERE id = #{id}
+    </update>
+    
+    <update id="updateBalance">
+        UPDATE sys_user SET balance = balance + #{amount}, update_time = NOW() WHERE id = #{id}
     </update>
     
     <delete id="deleteById">

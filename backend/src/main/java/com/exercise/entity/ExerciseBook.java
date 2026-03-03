@@ -2,6 +2,7 @@ package com.exercise.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,6 +16,8 @@ public class ExerciseBook {
     private Integer status;
     private Long creatorId;
     private Integer isPublic;
+    private BigDecimal price;
+    private String tag;
     
     private Integer totalCount;
     private Integer doneCount;
@@ -22,4 +25,5 @@ public class ExerciseBook {
     private Double correctRate;
     
     private String creatorName;
+    private Boolean purchased;
 }

@@ -16,6 +16,24 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 3295586320@qq.com
+    password: pbyvcznwgpzocifc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
 
 upload:
   path: D:/uploads

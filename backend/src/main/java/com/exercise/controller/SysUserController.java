@@ -2,6 +2,9 @@ package com.exercise.controller;
 
 import com.exercise.common.Result;
 import com.exercise.dto.LoginDTO;
+import com.exercise.dto.RegisterDTO;
+import com.exercise.dto.ResetPasswordDTO;
+import com.exercise.dto.SendCodeDTO;
 import com.exercise.entity.SysUser;
 import com.exercise.service.SysUserService;
 import com.exercise.vo.LoginVO;
@@ -29,9 +32,33 @@ public class SysUserController {
     }
     
     @PostMapping("/register")
-    public Result<Void> register(@RequestBody SysUser user) {
+    public Result<Void> register(@RequestBody RegisterDTO dto) {
         try {
-            sysUserService.register(user);
+            SysUser user = new SysUser();
+            user.setUsername(dto.getUsername());
+            user.setEmail(dto.getEmail());
+            user.setPassword(dto.getPassword());
+            sysUserService.register(user, dto.getCode());
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    @PostMapping("/sendVerifyCode")
+    public Result<Void> sendVerifyCode(@RequestBody SendCodeDTO dto) {
+        try {
+            sysUserService.sendVerifyCode(dto.getEmail(), dto.getType());
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    @PostMapping("/resetPassword")
+    public Result<Void> resetPassword(@RequestBody ResetPasswordDTO dto) {
+        try {
+            sysUserService.resetPassword(dto.getEmail(), dto.getCode(), dto.getNewPassword());
             return Result.success();
         } catch (Exception e) {
             return Result.error(e.getMessage());

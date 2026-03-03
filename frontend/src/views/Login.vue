@@ -45,8 +45,9 @@
       </div>
       
       <div class="login-box">
-        <h2 class="title">习题册刷题系统</h2>
-        <el-form :model="form" :rules="rules" ref="formRef" class="login-form">
+        <h2 class="title">{{ currentTitle }}</h2>
+        
+        <el-form :model="form" :rules="rules" ref="formRef" class="login-form" v-if="currentMode === 'login'">
           <el-form-item prop="username">
             <el-input 
               v-model="form.username" 
@@ -74,20 +75,149 @@
             <el-button type="primary" size="large" :loading="loading" @click="handleLogin" class="login-btn">登录</el-button>
           </el-form-item>
         </el-form>
+
+        <el-form :model="registerForm" :rules="registerRules" ref="registerFormRef" class="login-form" v-else-if="currentMode === 'register'">
+          <el-form-item prop="username">
+            <el-input 
+              v-model="registerForm.username" 
+              placeholder="请输入用户名" 
+              prefix-icon="User" 
+              size="large" 
+            />
+          </el-form-item>
+          <el-form-item prop="email">
+            <el-input 
+              v-model="registerForm.email" 
+              placeholder="请输入邮箱" 
+              prefix-icon="Message" 
+              size="large" 
+            />
+          </el-form-item>
+          <el-form-item prop="code">
+            <div class="code-input-wrapper">
+              <el-input 
+                v-model="registerForm.code" 
+                placeholder="请输入验证码" 
+                prefix-icon="Key" 
+                size="large" 
+              />
+              <el-button 
+                type="primary" 
+                size="large" 
+                :disabled="registerCodeCountdown > 0"
+                @click="sendRegisterCode"
+                class="code-btn"
+              >
+                {{ registerCodeCountdown > 0 ? `${registerCodeCountdown}s` : '获取验证码' }}
+              </el-button>
+            </div>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input 
+              v-model="registerForm.password" 
+              type="password" 
+              placeholder="请输入密码" 
+              prefix-icon="Lock" 
+              size="large" 
+              show-password
+            />
+          </el-form-item>
+          <el-form-item prop="confirmPassword">
+            <el-input 
+              v-model="registerForm.confirmPassword" 
+              type="password" 
+              placeholder="请确认密码" 
+              prefix-icon="Lock" 
+              size="large" 
+              show-password
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size="large" :loading="loading" @click="handleRegister" class="login-btn">注册</el-button>
+          </el-form-item>
+        </el-form>
+
+        <el-form :model="forgotForm" :rules="forgotRules" ref="forgotFormRef" class="login-form" v-else-if="currentMode === 'forgot'">
+          <el-form-item prop="email">
+            <el-input 
+              v-model="forgotForm.email" 
+              placeholder="请输入注册邮箱" 
+              prefix-icon="Message" 
+              size="large" 
+            />
+          </el-form-item>
+          <el-form-item prop="code">
+            <div class="code-input-wrapper">
+              <el-input 
+                v-model="forgotForm.code" 
+                placeholder="请输入验证码" 
+                prefix-icon="Key" 
+                size="large" 
+                @keyup.enter="handleVerifyCode"
+              />
+              <el-button 
+                type="primary" 
+                size="large" 
+                :disabled="codeCountdown > 0"
+                @click="sendCode"
+                class="code-btn"
+              >
+                {{ codeCountdown > 0 ? `${codeCountdown}s` : '获取验证码' }}
+              </el-button>
+            </div>
+          </el-form-item>
+          <el-form-item prop="newPassword">
+            <el-input 
+              v-model="forgotForm.newPassword" 
+              type="password" 
+              placeholder="请输入新密码" 
+              prefix-icon="Lock" 
+              size="large" 
+              show-password
+              @keyup.enter="handleResetPassword"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size="large" :loading="loading" @click="handleResetPassword" class="login-btn">重置密码</el-button>
+          </el-form-item>
+        </el-form>
+
+        <div class="mode-switch">
+          <template v-if="currentMode === 'login'">
+            <span class="switch-text">还没有账号？</span>
+            <el-button type="primary" link @click="switchMode('register')">立即注册</el-button>
+            <span class="divider">|</span>
+            <el-button type="primary" link @click="switchMode('forgot')">忘记密码？</el-button>
+          </template>
+          <template v-else-if="currentMode === 'register'">
+            <span class="switch-text">已有账号？</span>
+            <el-button type="primary" link @click="switchMode('login')">立即登录</el-button>
+          </template>
+          <template v-else>
+            <span class="switch-text">想起密码？</span>
+            <el-button type="primary" link @click="switchMode('login')">立即登录</el-button>
+            <span class="divider">|</span>
+            <el-button type="primary" link @click="switchMode('register')">立即注册</el-button>
+          </template>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
+import { register, sendVerifyCode, resetPasswordByEmail } from '@/api/user'
 
 const router = useRouter()
 const userStore = useUserStore()
 const formRef = ref(null)
+const registerFormRef = ref(null)
+const forgotFormRef = ref(null)
 const loading = ref(false)
 const isPasswordFocused = ref(false)
 const isShakingHead = ref(false)
@@ -95,15 +225,91 @@ const rightPupil = ref(null)
 const leftPupil = ref(null)
 const leftEyelid = ref(null)
 const rightEyelid = ref(null)
+const currentMode = ref('login')
+const codeCountdown = ref(0)
+const registerCodeCountdown = ref(0)
+
+const currentTitle = computed(() => {
+  switch (currentMode.value) {
+    case 'register': return '用户注册'
+    case 'forgot': return '忘记密码'
+    default: return '习题册刷题系统'
+  }
+})
 
 const form = reactive({
   username: '',
   password: ''
 })
 
+const registerForm = reactive({
+  username: '',
+  email: '',
+  code: '',
+  password: '',
+  confirmPassword: ''
+})
+
+const forgotForm = reactive({
+  email: '',
+  code: '',
+  newPassword: ''
+})
+
+const validateConfirmPassword = (rule, value, callback) => {
+  if (value !== registerForm.password) {
+    callback(new Error('两次输入的密码不一致'))
+  } else {
+    callback()
+  }
+}
+
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+}
+
+const registerRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+  ],
+  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于 6 位', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    { validator: validateConfirmPassword, trigger: 'blur' }
+  ]
+}
+
+const forgotRules = {
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+  ],
+  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于 6 位', trigger: 'blur' }
+  ]
+}
+
+const switchMode = (mode) => {
+  currentMode.value = mode
+  resetForms()
+}
+
+const resetForms = () => {
+  if (formRef.value) formRef.value.resetFields()
+  if (registerFormRef.value) registerFormRef.value.resetFields()
+  if (forgotFormRef.value) forgotFormRef.value.resetFields()
 }
 
 const handleUsernameFocus = () => {
@@ -164,8 +370,6 @@ onUnmounted(() => {
   document.removeEventListener('mousemove', handleMouseMove)
 })
 
-
-
 const handleLogin = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -181,6 +385,93 @@ const handleLogin = async () => {
     setTimeout(() => {
       isShakingHead.value = false
     }, 600)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleRegister = async () => {
+  const valid = await registerFormRef.value.validate().catch(() => false)
+  if (!valid) return
+  
+  loading.value = true
+  try {
+    await register({
+      username: registerForm.username,
+      email: registerForm.email,
+      code: registerForm.code,
+      password: registerForm.password
+    })
+    ElMessage.success('注册成功，请登录')
+    switchMode('login')
+  } catch (error) {
+    console.error(error)
+    ElMessage.error(error.message || '注册失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const sendCode = async () => {
+  const valid = await forgotFormRef.value.validateField('email').catch(() => false)
+  if (!valid) return
+  
+  try {
+    await sendVerifyCode({ email: forgotForm.email, type: 'forgot' })
+    ElMessage.success('验证码已发送到您的邮箱')
+    codeCountdown.value = 60
+    const timer = setInterval(() => {
+      codeCountdown.value--
+      if (codeCountdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+  } catch (error) {
+    console.error(error)
+    ElMessage.error(error.message || '发送验证码失败')
+  }
+}
+
+const sendRegisterCode = async () => {
+  const valid = await registerFormRef.value.validateField('email').catch(() => false)
+  if (!valid) return
+  
+  try {
+    await sendVerifyCode({ email: registerForm.email, type: 'register' })
+    ElMessage.success('验证码已发送到您的邮箱')
+    registerCodeCountdown.value = 60
+    const timer = setInterval(() => {
+      registerCodeCountdown.value--
+      if (registerCodeCountdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+  } catch (error) {
+    console.error(error)
+    ElMessage.error(error.message || '发送验证码失败')
+  }
+}
+
+const handleVerifyCode = () => {
+  
+}
+
+const handleResetPassword = async () => {
+  const valid = await forgotFormRef.value.validate().catch(() => false)
+  if (!valid) return
+  
+  loading.value = true
+  try {
+    await resetPasswordByEmail({
+      email: forgotForm.email,
+      code: forgotForm.code,
+      newPassword: forgotForm.newPassword
+    })
+    ElMessage.success('密码重置成功，请使用新密码登录')
+    switchMode('login')
+  } catch (error) {
+    console.error(error)
+    ElMessage.error(error.message || '密码重置失败')
   } finally {
     loading.value = false
   }
@@ -774,6 +1065,45 @@ const handleLogin = async () => {
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.mode-switch {
+  text-align: center;
+  margin-top: 20px;
+  
+  .switch-text {
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .divider {
+    margin: 0 10px;
+    color: #ccc;
+  }
+  
+  .el-button {
+    font-size: 14px;
+  }
+}
+
+.code-input-wrapper {
+  display: flex;
+  gap: 10px;
+  
+  .el-input {
+    flex: 1;
+  }
+  
+  .code-btn {
+    flex-shrink: 0;
+    min-width: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    
+    &:disabled {
+      background: #ccc;
+    }
   }
 }
 

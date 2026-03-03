@@ -8,6 +8,14 @@ export function register(data) {
   return request.post('/user/register', data)
 }
 
+export function sendVerifyCode(data) {
+  return request.post('/user/sendVerifyCode', data)
+}
+
+export function resetPasswordByEmail(data) {
+  return request.post('/user/resetPassword', data)
+}
+
 export function getUserInfo(id) {
   return request.get(`/user/info/${id}`)
 }

@@ -11,7 +11,10 @@
         <result column="status" property="status"/>
         <result column="creator_id" property="creatorId"/>
         <result column="is_public" property="isPublic"/>
+        <result column="price" property="price"/>
+        <result column="tag" property="tag"/>
         <result column="creator_name" property="creatorName"/>
+        <result column="purchased" property="purchased"/>
     </resultMap>
     
     <resultMap id="DetailResultMap" type="com.exercise.entity.ExerciseBook" extends="BaseResultMap">
@@ -21,9 +24,24 @@
     </resultMap>
     
     <select id="selectList" resultMap="BaseResultMap">
-        SELECT b.*, u.nickname as creator_name
+        SELECT b.*, u.username as creator_name
         FROM exercise_book b
         LEFT JOIN sys_user u ON b.creator_id = u.id
+        <where>
+            b.status = 1 AND (b.is_public = 1 OR b.creator_id IS NULL)
+            <if test="bookName != null and bookName != ''">
+                AND b.book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+        </where>
+        ORDER BY b.create_time DESC
+    </select>
+    
+    <select id="selectListWithPurchase" resultMap="BaseResultMap">
+        SELECT b.*, u.username as creator_name,
+               CASE WHEN p.id IS NOT NULL OR b.creator_id = #{userId} THEN 1 ELSE 0 END as purchased
+        FROM exercise_book b
+        LEFT JOIN sys_user u ON b.creator_id = u.id
+        LEFT JOIN book_purchase p ON b.id = p.book_id AND p.user_id = #{userId}
         <where>
             b.status = 1 AND (b.is_public = 1 OR b.creator_id IS NULL)
             <if test="bookName != null and bookName != ''">
@@ -46,8 +64,17 @@
         SELECT * FROM exercise_book WHERE id = #{id}
     </select>
     
+    <select id="selectByIdWithPurchase" resultMap="BaseResultMap">
+        SELECT b.*, u.username as creator_name,
+               CASE WHEN p.id IS NOT NULL OR b.creator_id = #{userId} THEN 1 ELSE 0 END as purchased
+        FROM exercise_book b
+        LEFT JOIN sys_user u ON b.creator_id = u.id
+        LEFT JOIN book_purchase p ON b.id = p.book_id AND p.user_id = #{userId}
+        WHERE b.id = #{id}
+    </select>
+    
     <select id="selectByCreatorId" resultMap="BaseResultMap">
-        SELECT b.*, u.nickname as creator_name
+        SELECT b.*, u.username as creator_name
         FROM exercise_book b
         LEFT JOIN sys_user u ON b.creator_id = u.id
         WHERE b.creator_id = #{creatorId}
@@ -55,15 +82,15 @@
     </select>
     
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT b.*, u.nickname as creator_name
+        SELECT b.*, u.username as creator_name
         FROM exercise_book b
         LEFT JOIN sys_user u ON b.creator_id = u.id
         ORDER BY b.create_time DESC
     </select>
     
     <insert id="insert" parameterType="com.exercise.entity.ExerciseBook" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO exercise_book (book_name, book_desc, type_id, status, creator_id, is_public, create_time)
-        VALUES (#{bookName}, #{bookDesc}, #{typeId}, #{status}, #{creatorId}, #{isPublic}, #{createTime})
+        INSERT INTO exercise_book (book_name, book_desc, type_id, status, creator_id, is_public, price, tag, create_time)
+        VALUES (#{bookName}, #{bookDesc}, #{typeId}, #{status}, #{creatorId}, #{isPublic}, #{price}, #{tag}, #{createTime})
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.ExerciseBook">
@@ -73,12 +100,18 @@
             <if test="bookDesc != null">book_desc = #{bookDesc},</if>
             <if test="status != null">status = #{status},</if>
             <if test="isPublic != null">is_public = #{isPublic},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="tag != null">tag = #{tag},</if>
         </set>
         WHERE id = #{id}
     </update>
     
     <update id="updateStatus">
         UPDATE exercise_book SET status = #{status} WHERE id = #{id}
+    </update>
+    
+    <update id="updatePrice">
+        UPDATE exercise_book SET price = #{price} WHERE id = #{id}
     </update>
     
     <delete id="deleteById">

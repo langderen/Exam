@@ -4,6 +4,10 @@ export function getBookList(params) {
   return request.get('/book/list', { params })
 }
 
+export function getBookListWithPurchase(params) {
+  return request.get('/book/listWithPurchase', { params })
+}
+
 export function getBookDetail(bookId, userId) {
   return request.get(`/book/detail/${bookId}`, { params: { userId } })
 }
@@ -30,4 +34,20 @@ export function deleteBook(id) {
 
 export function getAllBooks() {
   return request.get('/book/all')
+}
+
+export function purchaseBook(data) {
+  return request.post('/purchase/buy', data)
+}
+
+export function checkPurchased(bookId, userId) {
+  return request.get('/purchase/check', { params: { bookId, userId } })
+}
+
+export function getMyPurchases(userId) {
+  return request.get('/purchase/my', { params: { userId } })
+}
+
+export function updateBookPrice(id, price) {
+  return request.put(`/book/price/${id}`, null, { params: { price } })
 }

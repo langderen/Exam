@@ -21,6 +21,12 @@ public class ExerciseBookController {
         return Result.success(list);
     }
     
+    @GetMapping("/listWithPurchase")
+    public Result<List<ExerciseBook>> listWithPurchase(@RequestParam(required = false) String bookName, @RequestParam Long userId) {
+        List<ExerciseBook> list = exerciseBookService.getListWithPurchase(bookName, userId);
+        return Result.success(list);
+    }
+    
     @GetMapping("/detail/{bookId}")
     public Result<ExerciseBook> detail(@PathVariable Long bookId, @RequestParam Long userId) {
         ExerciseBook book = exerciseBookService.getDetailById(bookId, userId);
@@ -77,5 +83,15 @@ public class ExerciseBookController {
     public Result<List<ExerciseBook>> allBooks() {
         List<ExerciseBook> list = exerciseBookService.getAllBooks();
         return Result.success(list);
+    }
+    
+    @PutMapping("/price/{id}")
+    public Result<Void> updatePrice(@PathVariable Long id, @RequestParam java.math.BigDecimal price) {
+        try {
+            exerciseBookService.updatePrice(id, price);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
 }

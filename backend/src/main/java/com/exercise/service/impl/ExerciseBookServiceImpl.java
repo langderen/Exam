@@ -5,6 +5,7 @@ import com.exercise.mapper.ExerciseBookMapper;
 import com.exercise.service.ExerciseBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,6 +18,11 @@ public class ExerciseBookServiceImpl implements ExerciseBookService {
     @Override
     public List<ExerciseBook> getList(String bookName) {
         return exerciseBookMapper.selectList(bookName);
+    }
+    
+    @Override
+    public List<ExerciseBook> getListWithPurchase(String bookName, Long userId) {
+        return exerciseBookMapper.selectListWithPurchase(bookName, userId);
     }
     
     @Override
@@ -39,6 +45,11 @@ public class ExerciseBookServiceImpl implements ExerciseBookService {
     }
     
     @Override
+    public ExerciseBook getByIdWithPurchase(Long id, Long userId) {
+        return exerciseBookMapper.selectByIdWithPurchase(id, userId);
+    }
+    
+    @Override
     public List<ExerciseBook> getMyBooks(Long userId) {
         return exerciseBookMapper.selectByCreatorId(userId);
     }
@@ -48,6 +59,9 @@ public class ExerciseBookServiceImpl implements ExerciseBookService {
         book.setCreateTime(LocalDateTime.now());
         book.setStatus(1);
         book.setIsPublic(1);
+        if (book.getPrice() == null) {
+            book.setPrice(java.math.BigDecimal.ZERO);
+        }
         exerciseBookMapper.insert(book);
     }
     
@@ -59,6 +73,11 @@ public class ExerciseBookServiceImpl implements ExerciseBookService {
     @Override
     public void updateStatus(Long id, Integer status) {
         exerciseBookMapper.updateStatus(id, status);
+    }
+    
+    @Override
+    public void updatePrice(Long id, BigDecimal price) {
+        exerciseBookMapper.updatePrice(id, price);
     }
     
     @Override

@@ -12,7 +12,7 @@ public interface SysUserService {
     
     SysUser getByUsername(String username);
     
-    void register(SysUser user);
+    void register(SysUser user, String code);
     
     void updateInfo(SysUser user);
     
@@ -21,4 +21,8 @@ public interface SysUserService {
     List<SysUser> listUsers(String role);
     
     void deleteUser(Long id);
+    
+    void sendVerifyCode(String email, String type);
+    
+    void resetPassword(String email, String code, String newPassword);
 }

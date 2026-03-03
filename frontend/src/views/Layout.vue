@@ -12,7 +12,7 @@
         <div class="user-info">
           <el-dropdown>
             <span class="user-dropdown">
-              {{ userStore.userInfo?.nickname || userStore.userInfo?.username }}
+              {{ userStore.userInfo?.username }}
               <el-icon><ArrowDown /></el-icon>
             </span>
             <template #dropdown>

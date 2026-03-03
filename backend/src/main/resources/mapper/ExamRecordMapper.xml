@@ -16,6 +16,10 @@
         <result column="create_time" property="createTime"/>
     </resultMap>
     
+    <resultMap id="DetailResultMap" type="com.exercise.entity.ExamRecord" extends="BaseResultMap">
+        <result column="book_name" property="bookName"/>
+    </resultMap>
+    
     <insert id="insert" parameterType="com.exercise.entity.ExamRecord" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO exam_record (user_id, book_id, exam_name, total_count, correct_count, score, start_time, status)
         VALUES (#{userId}, #{bookId}, #{examName}, #{totalCount}, #{correctCount}, #{score}, #{startTime}, #{status})
@@ -31,7 +35,7 @@
         WHERE id = #{id}
     </update>
     
-    <select id="selectByUserId" resultMap="BaseResultMap">
+    <select id="selectByUserId" resultMap="DetailResultMap">
         SELECT er.*, eb.book_name
         FROM exam_record er
         LEFT JOIN exercise_book eb ON er.book_id = eb.id

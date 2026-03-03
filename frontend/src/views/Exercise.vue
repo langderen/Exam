@@ -129,6 +129,18 @@
         />
       </div>
     </div>
+    
+    <el-dialog v-model="purchaseDialogVisible" title="购买习题册" width="400px" :close-on-click-modal="false" :show-close="false">
+      <div class="purchase-info" v-if="book">
+        <p><strong>习题册名称：</strong>{{ book.bookName }}</p>
+        <p><strong>价格：</strong>¥{{ book.price }}</p>
+        <p class="purchase-tip">购买后可使用该习题册的全部功能</p>
+      </div>
+      <template #footer>
+        <el-button @click="goBack">返回列表</el-button>
+        <el-button type="primary" @click="confirmPurchase" :loading="purchasing">确认购买</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -136,7 +148,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getBookDetail } from '@/api/book'
+import { getBookDetail, checkPurchased, purchaseBook } from '@/api/book'
 import { getSequence, getRandom, submitAnswer as submitAnswerApi, getQuestionDetail, jumpToQuestion as jumpToQuestionApi, getAnswerStatus, getUserQuestionRecord } from '@/api/question'
 import { addCollection, removeCollection } from '@/api/collection'
 import { useUserStore } from '@/store/user'
@@ -160,6 +172,9 @@ const submitting = ref(false)
 const isCorrect = ref(false)
 const isCollected = ref(false)
 const answerStatusList = ref([])
+const needPurchase = ref(false)
+const purchaseDialogVisible = ref(false)
+const purchasing = ref(false)
 
 const parsedOptions = computed(() => {
   if (!question.value) return []
@@ -181,6 +196,15 @@ onMounted(async () => {
   const bookRes = await getBookDetail(bookId, userStore.userInfo.id)
   book.value = bookRes.data
   totalCount.value = bookRes.data.totalCount || 0
+  
+  if (book.value.price && book.value.price > 0 && book.value.creatorId !== userStore.userInfo.id) {
+    const purchasedRes = await checkPurchased(bookId, userStore.userInfo.id)
+    if (!purchasedRes.data) {
+      needPurchase.value = true
+      purchaseDialogVisible.value = true
+      return
+    }
+  }
   
   currentIndex.value = exerciseStore.getProgress(bookId)
   
@@ -377,6 +401,33 @@ const toggleCollection = async () => {
     console.error(error)
   }
 }
+
+const confirmPurchase = async () => {
+  if (!book.value) return
+  
+  try {
+    purchasing.value = true
+    await purchaseBook({
+      bookId: book.value.id,
+      userId: userStore.userInfo.id
+    })
+    ElMessage.success('购买成功')
+    purchaseDialogVisible.value = false
+    needPurchase.value = false
+    
+    currentIndex.value = exerciseStore.getProgress(book.value.id)
+    await loadAnswerStatus()
+    await loadQuestion()
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '购买失败')
+  } finally {
+    purchasing.value = false
+  }
+}
+
+const goBack = () => {
+  router.push('/books')
+}
 </script>
 
 <style scoped lang="scss">
@@ -519,6 +570,19 @@ const toggleCollection = async () => {
     margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid #eee;
+  }
+}
+
+.purchase-info {
+  p {
+    margin: 10px 0;
+    font-size: 14px;
+  }
+  
+  .purchase-tip {
+    color: #999;
+    font-size: 12px;
+    margin-top: 15px;
   }
 }
 </style>
