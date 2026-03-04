@@ -8,6 +8,10 @@ export function getBookListWithPurchase(params) {
   return request.get('/book/listWithPurchase', { params })
 }
 
+export function getBookListWithPurchasePaged(params) {
+  return request.get('/book/listWithPurchasePaged', { params })
+}
+
 export function getBookDetail(bookId, userId) {
   return request.get(`/book/detail/${bookId}`, { params: { userId } })
 }

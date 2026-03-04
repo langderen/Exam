@@ -12,10 +12,13 @@ public class QuestionRecord {
     private Long bookId;
     private Integer questionSeq;
     private String answer;
+    private String answerAttachment;
+    private String answerAttachmentName;
     private Integer isCorrect;
     private Integer isAnswered;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime doTime;
     
+    private Integer errorCount;
     private Question question;
 }

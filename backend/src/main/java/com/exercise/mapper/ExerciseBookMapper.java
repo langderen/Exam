@@ -12,6 +12,10 @@ public interface ExerciseBookMapper {
     
     List<ExerciseBook> selectListWithPurchase(@Param("bookName") String bookName, @Param("userId") Long userId);
     
+    List<ExerciseBook> selectListWithPurchasePaged(@Param("bookName") String bookName, @Param("userId") Long userId, @Param("offset") int offset, @Param("pageSize") int pageSize);
+    
+    int countListWithPurchase(@Param("bookName") String bookName, @Param("userId") Long userId);
+    
     ExerciseBook selectDetailById(@Param("id") Long id, @Param("userId") Long userId);
     
     ExerciseBook selectById(@Param("id") Long id);

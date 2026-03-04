@@ -37,4 +37,14 @@ public class QuestionRecordServiceImpl implements QuestionRecordService {
     public int countErrors(Long userId, Long bookId, Long typeId) {
         return questionRecordMapper.countErrors(userId, bookId, typeId);
     }
+    
+    @Override
+    public List<QuestionRecord> getHighErrorQuestions(Long userId, Integer limit) {
+        return questionRecordMapper.selectHighErrorQuestions(userId, limit);
+    }
+    
+    @Override
+    public List<QuestionRecord> getRecentRecords(Long userId, Integer limit) {
+        return questionRecordMapper.selectRecentRecords(userId, limit);
+    }
 }

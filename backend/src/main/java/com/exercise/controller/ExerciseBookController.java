@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import com.exercise.common.PageResult;
 import com.exercise.common.Result;
 import com.exercise.entity.ExerciseBook;
 import com.exercise.service.ExerciseBookService;
@@ -25,6 +26,16 @@ public class ExerciseBookController {
     public Result<List<ExerciseBook>> listWithPurchase(@RequestParam(required = false) String bookName, @RequestParam Long userId) {
         List<ExerciseBook> list = exerciseBookService.getListWithPurchase(bookName, userId);
         return Result.success(list);
+    }
+    
+    @GetMapping("/listWithPurchasePaged")
+    public Result<PageResult<ExerciseBook>> listWithPurchasePaged(
+            @RequestParam(required = false) String bookName,
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        PageResult<ExerciseBook> result = exerciseBookService.getListWithPurchasePaged(bookName, userId, page, pageSize);
+        return Result.success(result);
     }
     
     @GetMapping("/detail/{bookId}")

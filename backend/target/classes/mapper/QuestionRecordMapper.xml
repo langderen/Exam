@@ -9,9 +9,12 @@
         <result column="book_id" property="bookId"/>
         <result column="question_seq" property="questionSeq"/>
         <result column="answer" property="answer"/>
+        <result column="answer_attachment" property="answerAttachment"/>
+        <result column="answer_attachment_name" property="answerAttachmentName"/>
         <result column="is_correct" property="isCorrect"/>
         <result column="is_answered" property="isAnswered"/>
         <result column="do_time" property="doTime"/>
+        <result column="error_count" property="errorCount"/>
     </resultMap>
     
     <resultMap id="DetailResultMap" type="com.exercise.entity.QuestionRecord" extends="BaseResultMap">
@@ -25,17 +28,20 @@
             <result column="q_analysis" property="analysis"/>
             <result column="q_difficulty" property="difficulty"/>
             <result column="q_type_name" property="typeName"/>
+            <result column="q_attachment" property="attachment"/>
+            <result column="q_attachment_name" property="attachmentName"/>
+            <result column="q_book_name" property="bookName"/>
         </association>
     </resultMap>
     
     <insert id="insert" parameterType="com.exercise.entity.QuestionRecord" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO question_record (user_id, question_id, book_id, question_seq, answer, is_correct, is_answered)
-        VALUES (#{userId}, #{questionId}, #{bookId}, #{questionSeq}, #{answer}, #{isCorrect}, #{isAnswered})
+        INSERT INTO question_record (user_id, question_id, book_id, question_seq, answer, answer_attachment, answer_attachment_name, is_correct, is_answered)
+        VALUES (#{userId}, #{questionId}, #{bookId}, #{questionSeq}, #{answer}, #{answerAttachment}, #{answerAttachmentName}, #{isCorrect}, #{isAnswered})
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.QuestionRecord">
         UPDATE question_record
-        SET answer = #{answer}, is_correct = #{isCorrect}, is_answered = #{isAnswered}, do_time = NOW()
+        SET answer = #{answer}, answer_attachment = #{answerAttachment}, answer_attachment_name = #{answerAttachmentName}, is_correct = #{isCorrect}, is_answered = #{isAnswered}, do_time = NOW()
         WHERE id = #{id}
     </update>
     
@@ -48,6 +54,7 @@
                q.id as q_id, q.book_id as q_book_id, q.type_id as q_type_id,
                q.content as q_content, q.options as q_options, q.answer as q_answer,
                q.analysis as q_analysis, q.difficulty as q_difficulty,
+               q.attachment as q_attachment, q.attachment_name as q_attachment_name,
                qt.type_name as q_type_name,
                (SELECT COUNT(*) FROM question_record qr2 WHERE qr2.question_id = qr.question_id AND qr2.user_id = qr.user_id AND qr2.is_correct = 0) as error_count
         FROM question_record qr
@@ -97,6 +104,10 @@
         DELETE FROM question_record WHERE id = #{id}
     </delete>
     
+    <delete id="deleteByUserAndBook">
+        DELETE FROM question_record WHERE user_id = #{userId} AND book_id = #{bookId}
+    </delete>
+    
     <select id="selectByUserAndQuestion" resultMap="BaseResultMap">
         SELECT * FROM question_record 
         WHERE user_id = #{userId} AND question_id = #{questionId}
@@ -110,5 +121,42 @@
         FROM question_record qr
         WHERE qr.user_id = #{userId} AND qr.book_id = #{bookId}
         ORDER BY qr.question_id ASC
+    </select>
+    
+    <select id="selectHighErrorQuestions" resultMap="DetailResultMap">
+        SELECT 
+               qr.id, qr.user_id, qr.question_id, qr.book_id, qr.question_seq, 
+               qr.answer, qr.answer_attachment, qr.answer_attachment_name,
+               qr.is_correct, qr.is_answered, qr.do_time,
+               q.id as q_id, q.book_id as q_book_id, q.type_id as q_type_id,
+               q.content as q_content, q.options as q_options, q.answer as q_answer,
+               q.analysis as q_analysis, q.difficulty as q_difficulty,
+               q.attachment as q_attachment, q.attachment_name as q_attachment_name,
+               qt.type_name as q_type_name,
+               eb.book_name as q_book_name,
+               COUNT(qr.id) as error_count
+        FROM question_record qr
+        LEFT JOIN question q ON qr.question_id = q.id
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        LEFT JOIN exercise_book eb ON q.book_id = eb.id
+        WHERE qr.user_id = #{userId} AND qr.is_correct = 0
+        GROUP BY qr.question_id, q.id, q.book_id, q.type_id, q.content, q.options, q.answer, q.analysis, q.difficulty, q.attachment, q.attachment_name, qt.type_name, eb.book_name, qr.id, qr.user_id, qr.book_id, qr.question_seq, qr.answer, qr.answer_attachment, qr.answer_attachment_name, qr.is_correct, qr.is_answered, qr.do_time
+        ORDER BY error_count DESC
+        LIMIT #{limit}
+    </select>
+    
+    <select id="selectRecentRecords" resultMap="DetailResultMap">
+        SELECT qr.*, 
+               q.id as q_id, q.book_id as q_book_id, q.type_id as q_type_id,
+               q.content as q_content, q.options as q_options, q.answer as q_answer,
+               q.analysis as q_analysis, q.difficulty as q_difficulty,
+               q.attachment as q_attachment, q.attachment_name as q_attachment_name,
+               qt.type_name as q_type_name
+        FROM question_record qr
+        LEFT JOIN question q ON qr.question_id = q.id
+        LEFT JOIN question_type qt ON q.type_id = qt.id
+        WHERE qr.user_id = #{userId}
+        ORDER BY qr.do_time DESC
+        LIMIT #{limit}
     </select>
 </mapper>

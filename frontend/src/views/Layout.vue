@@ -2,7 +2,7 @@
   <div class="layout-container">
     <el-container>
       <el-header class="header">
-        <div class="logo">习题册刷题系统</div>
+        <div class="logo">刷题8</div>
         <el-menu mode="horizontal" :default-active="activeMenu" class="nav-menu" router>
           <el-menu-item index="/home">首页</el-menu-item>
           <el-menu-item index="/books">习题册</el-menu-item>
@@ -10,6 +10,9 @@
           <el-menu-item index="/collection">收藏夹</el-menu-item>
         </el-menu>
         <div class="user-info">
+          <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
+            <el-button :icon="Bell" circle @click="showNotifications" />
+          </el-badge>
           <el-dropdown>
             <span class="user-dropdown">
               {{ userStore.userInfo?.username }}
@@ -26,22 +29,95 @@
       </el-header>
       <el-main class="main">
         <router-view />
+        
       </el-main>
     </el-container>
+    
+    <el-drawer v-model="notificationDrawer" title="消息通知" size="400px">
+      <div class="notification-list">
+        <div class="notification-actions">
+          <el-button type="primary" link @click="markAllRead" :disabled="unreadCount === 0">
+            全部已读
+          </el-button>
+        </div>
+        <div v-for="notification in notifications" :key="notification.id" class="notification-item" :class="{ unread: notification.isRead === 0 }">
+          <div class="notification-title">{{ notification.title }}</div>
+          <div class="notification-content">{{ notification.content }}</div>
+          <div class="notification-time">{{ notification.createTime }}</div>
+          <div class="notification-actions" v-if="notification.type === 'exam' && notification.relatedId">
+            <el-button type="primary" size="small" @click="viewExamResult(notification.relatedId)">
+              查看详情
+            </el-button>
+          </div>
+        </div>
+        <el-empty v-if="notifications.length === 0" description="暂无消息" />
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { ArrowDown, Bell } from '@element-plus/icons-vue'
+import { getNotifications, getUnreadCount, markAllAsRead, markAsRead } from '@/api/notification'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
+const notificationDrawer = ref(false)
+const notifications = ref([])
+const unreadCount = ref(0)
+
+onMounted(async () => {
+  await loadUnreadCount()
+})
+
+const loadUnreadCount = async () => {
+  try {
+    const res = await getUnreadCount(userStore.userInfo.id)
+    unreadCount.value = res.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const showNotifications = async () => {
+  notificationDrawer.value = true
+  await loadNotifications()
+}
+
+const loadNotifications = async () => {
+  try {
+    const res = await getNotifications(userStore.userInfo.id)
+    notifications.value = res.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const markAllRead = async () => {
+  try {
+    await markAllAsRead(userStore.userInfo.id)
+    unreadCount.value = 0
+    notifications.value.forEach(n => n.isRead = 1)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const viewExamResult = async (examId) => {
+  const notification = notifications.value.find(n => n.relatedId === examId)
+  if (notification && notification.isRead === 0) {
+    await markAsRead(notification.id)
+    unreadCount.value = Math.max(0, unreadCount.value - 1)
+  }
+  notificationDrawer.value = false
+  router.push(`/exam-result/${examId}`)
+}
 
 const goProfile = () => {
   router.push('/profile')
@@ -105,5 +181,79 @@ const handleLogout = () => {
   background: #f5f7fa;
   padding: 20px;
   overflow-y: auto;
+  min-height: calc(100vh - 60px);
+}
+
+.footer {
+  background: #fff;
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  margin-top: 20px;
+  
+  .footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    font-size: 14px;
+    
+    a {
+      color: #999;
+      text-decoration: none;
+      
+      &:hover {
+        color: #409eff;
+      }
+    }
+    
+    .divider {
+      margin: 0 10px;
+      color: #ddd;
+    }
+  }
+}
+
+.notification-badge {
+  margin-right: 10px;
+}
+
+.notification-list {
+  .notification-actions {
+    text-align: right;
+    margin-bottom: 15px;
+  }
+  
+  .notification-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    
+    &.unread {
+      background: #f0f9ff;
+    }
+    
+    .notification-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    
+    .notification-content {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    .notification-time {
+      color: #999;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .notification-actions {
+      text-align: left;
+      margin-bottom: 0;
+    }
+  }
 }
 </style>

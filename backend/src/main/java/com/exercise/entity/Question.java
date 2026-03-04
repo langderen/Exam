@@ -16,6 +16,10 @@ public class Question {
     private String answer;
     private String analysis;
     private Integer difficulty;
+    private String attachment;
+    private String attachmentName;
+    private Integer aiScoring;
+    private String keyPoints;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     

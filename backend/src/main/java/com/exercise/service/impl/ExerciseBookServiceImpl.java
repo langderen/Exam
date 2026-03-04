@@ -1,5 +1,6 @@
 package com.exercise.service.impl;
 
+import com.exercise.common.PageResult;
 import com.exercise.entity.ExerciseBook;
 import com.exercise.mapper.ExerciseBookMapper;
 import com.exercise.service.ExerciseBookService;
@@ -23,6 +24,14 @@ public class ExerciseBookServiceImpl implements ExerciseBookService {
     @Override
     public List<ExerciseBook> getListWithPurchase(String bookName, Long userId) {
         return exerciseBookMapper.selectListWithPurchase(bookName, userId);
+    }
+    
+    @Override
+    public PageResult<ExerciseBook> getListWithPurchasePaged(String bookName, Long userId, int page, int pageSize) {
+        int offset = (page - 1) * pageSize;
+        List<ExerciseBook> list = exerciseBookMapper.selectListWithPurchasePaged(bookName, userId, offset, pageSize);
+        int total = exerciseBookMapper.countListWithPurchase(bookName, userId);
+        return new PageResult<>((long) total, list);
     }
     
     @Override

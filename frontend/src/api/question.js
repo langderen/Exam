@@ -47,3 +47,7 @@ export function deleteQuestion(id) {
 export function batchCreateQuestions(questions) {
   return request.post('/question/batch', questions)
 }
+
+export function clearRecords(userId, bookId) {
+  return request.delete(`/question/records/${userId}/${bookId}`)
+}

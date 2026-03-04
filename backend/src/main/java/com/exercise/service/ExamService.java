@@ -19,6 +19,8 @@ public interface ExamService {
     
     ExamResultVO submitExam(SubmitExamDTO dto);
     
+    ExamResultVO getExamResult(Long examId);
+    
     List<ExamQuestion> getExamQuestions(Long examId);
     
     List<ExamRecord> getUserExamRecords(Long userId);

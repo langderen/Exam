@@ -39,7 +39,13 @@
         SELECT er.*, eb.book_name
         FROM exam_record er
         LEFT JOIN exercise_book eb ON er.book_id = eb.id
-        WHERE er.user_id = #{userId} AND er.status = 1
+        WHERE er.user_id = #{userId}
         ORDER BY er.create_time DESC
     </select>
+    
+    <update id="updateStatus">
+        UPDATE exam_record
+        SET status = #{status}, correct_count = #{correctCount}, score = #{score}, end_time = NOW()
+        WHERE id = #{id}
+    </update>
 </mapper>

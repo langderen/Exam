@@ -41,7 +41,7 @@
       </div>
     </div>
     
-    <el-row :gutter="20" class="book-list">
+    <el-row :gutter="20" class="book-list" v-loading="loading">
       <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="book in books" :key="book.id">
         <el-card shadow="hover" class="book-card">
           <div class="book-header">
@@ -74,6 +74,18 @@
       </el-col>
     </el-row>
     
+    <div class="pagination-container" v-if="total > 0">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[8, 16, 24, 32]"
+        :total="total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handlePageChange"
+      />
+    </div>
+    
     <el-dialog v-model="purchaseDialogVisible" title="购买习题册" width="400px">
       <div class="purchase-info" v-if="selectedBook">
         <p><strong>习题册名称：</strong>{{ selectedBook.bookName }}</p>
@@ -91,7 +103,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Document, User } from '@element-plus/icons-vue'
-import { getBookListWithPurchase, getBookDetail, purchaseBook } from '@/api/book'
+import { getBookListWithPurchasePaged, getBookDetail, purchaseBook } from '@/api/book'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 import { predefinedTags } from '@/constants/tags'
@@ -107,6 +119,10 @@ const books = ref([])
 const purchaseDialogVisible = ref(false)
 const selectedBook = ref(null)
 const purchasing = ref(false)
+const loading = ref(false)
+const currentPage = ref(1)
+const pageSize = ref(8)
+const total = ref(0)
 
 onMounted(() => {
   loadBooks()
@@ -114,11 +130,15 @@ onMounted(() => {
 
 const loadBooks = async () => {
   try {
-    const res = await getBookListWithPurchase({ 
+    loading.value = true
+    const res = await getBookListWithPurchasePaged({ 
       bookName: searchName.value,
-      userId: userStore.userInfo.id 
+      userId: userStore.userInfo.id,
+      page: currentPage.value,
+      pageSize: pageSize.value
     })
-    let bookList = res.data
+    let bookList = res.data.list || []
+    total.value = res.data.total || 0
     
     if (filterType.value === 'free') {
       bookList = bookList.filter(book => !book.price || book.price === 0)
@@ -145,7 +165,20 @@ const loadBooks = async () => {
     tagList.value = Array.from(tags)
   } catch (error) {
     console.error(error)
+  } finally {
+    loading.value = false
   }
+}
+
+const handleSizeChange = (val) => {
+  pageSize.value = val
+  currentPage.value = 1
+  loadBooks()
+}
+
+const handlePageChange = (val) => {
+  currentPage.value = val
+  loadBooks()
 }
 
 const goToExercise = (book) => {
@@ -350,5 +383,14 @@ const confirmPurchase = async () => {
     font-size: 14px;
     color: #666;
   }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
 }
 </style>

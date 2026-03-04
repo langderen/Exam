@@ -23,4 +23,5 @@ public class ExamRecord {
     private LocalDateTime createTime;
     
     private String bookName;
+    private Integer unreadCount;
 }

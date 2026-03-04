@@ -90,7 +90,18 @@
     </div>
     
     <div class="result-section" v-if="examSubmitted">
-      <el-card class="result-card">
+      <el-card class="result-card" v-if="examResult.scoringStatus === 'scoring'">
+        <h2>试卷已提交</h2>
+        <div class="scoring-info">
+          <el-icon class="is-loading" :size="48"><Loading /></el-icon>
+          <p>正在判卷中，请稍候...</p>
+          <p class="tip">判卷完成后将通过消息通知您</p>
+        </div>
+        <el-button type="primary" @click="checkExamResult">查看判卷进度</el-button>
+        <el-button @click="$router.push('/books')">返回习题册</el-button>
+      </el-card>
+      
+      <el-card class="result-card" v-else>
         <h2>考试结果</h2>
         <div class="score-info">
           <div class="score">{{ examResult.score }}分</div>
@@ -104,13 +115,16 @@
         <el-button @click="$router.push('/books')">返回习题册</el-button>
       </el-card>
       
-      <div class="detail-section">
+      <div class="detail-section" v-if="examResult.scoringStatus === 'completed'">
         <h3>答题详情</h3>
         <el-card v-for="(q, index) in examResult.questions" :key="q.questionId" class="detail-card">
           <div class="detail-header">
             <span class="question-num">第 {{ index + 1 }} 题</span>
             <el-tag :type="q.isCorrect ? 'success' : 'danger'">
               {{ q.isCorrect ? '正确' : '错误' }}
+            </el-tag>
+            <el-tag v-if="q.aiScoring === 1" type="warning" style="margin-left: 5px;">
+              AI评分: {{ q.aiScore }}分
             </el-tag>
           </div>
           <p class="question-content">{{ q.content }}</p>
@@ -122,6 +136,13 @@
           <div class="analysis" v-if="q.analysis">
             <p><strong>解析:</strong> {{ q.analysis }}</p>
           </div>
+          <div class="ai-comment" v-if="q.aiScoring === 1 && q.aiComment">
+            <el-collapse>
+              <el-collapse-item title="AI评分详情" name="ai">
+                <div class="ai-comment-content">{{ q.aiComment }}</div>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
         </el-card>
       </div>
     </div>
@@ -132,8 +153,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 import { getBookDetail } from '@/api/book'
-import { generateExam, submitExam as submitExamApi, jumpQuestion, saveAnswer, getExamQuestions } from '@/api/exam'
+import { generateExam, submitExam as submitExamApi, jumpQuestion, saveAnswer, getExamQuestions, getExamResult } from '@/api/exam'
 import { getTypeList } from '@/api/type'
 import { useUserStore } from '@/store/user'
 import AnswerCard from '@/components/AnswerCard.vue'
@@ -290,6 +312,24 @@ const submitExam = async () => {
     console.error(error)
   } finally {
     submitting.value = false
+  }
+}
+
+const checkExamResult = async () => {
+  if (!examResult.value.examId) return
+  
+  try {
+    const res = await getExamResult(examResult.value.examId)
+    examResult.value = res.data
+    
+    if (res.data.scoringStatus === 'completed') {
+      ElMessage.success('判卷已完成！')
+    } else {
+      ElMessage.info('判卷仍在进行中，请稍后再试')
+    }
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('获取判卷结果失败')
   }
 }
 
@@ -488,6 +528,25 @@ watch(() => questions.value, () => {
         margin: 5px 0;
       }
     }
+    
+    .scoring-info {
+      margin-bottom: 20px;
+      
+      .el-icon {
+        color: #409eff;
+        margin-bottom: 15px;
+      }
+      
+      p {
+        color: #666;
+        margin: 10px 0;
+      }
+      
+      .tip {
+        font-size: 13px;
+        color: #999;
+      }
+    }
   }
   
   .detail-section {
@@ -536,6 +595,16 @@ watch(() => questions.value, () => {
       
       p {
         margin: 5px 0;
+        color: #666;
+      }
+    }
+    
+    .ai-comment {
+      margin-top: 10px;
+      
+      .ai-comment-content {
+        white-space: pre-wrap;
+        line-height: 1.6;
         color: #666;
       }
     }

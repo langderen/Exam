@@ -10,6 +10,8 @@ public interface ExerciseBookService {
     
     List<ExerciseBook> getListWithPurchase(String bookName, Long userId);
     
+    PageResult<ExerciseBook> getListWithPurchasePaged(String bookName, Long userId, int page, int pageSize);
+    
     ExerciseBook getDetailById(Long id, Long userId);
     
     ExerciseBook getById(Long id);

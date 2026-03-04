@@ -89,10 +89,10 @@ source database/init.sql
 
 # 解压后启动
 cd Redis-x64-3.0.504
-redis-server.exe redis.windows.conf
+.\redis-server.exe redis.conf
 
 # 测试连接
-redis-cli.exe ping
+.\redis-cli.exe ping
 # 返回 PONG 表示启动成功
 ```
 
@@ -322,25 +322,8 @@ npm run build
 **方式一：使用 WSL2（推荐）**
 
 ```bash
-# 在 WSL2 中安装 Redis
-sudo apt update
-sudo apt install redis-server
-
-# 启动 Redis
-sudo service redis-server start
-
-# 设置开机自启
-sudo systemctl enable redis-server
-
-# 配置 Redis
-sudo nano /etc/redis/redis.conf
-
-# 修改以下配置
-# bind 127.0.0.1 -> bind 0.0.0.0  # 允许外部访问
-# requirepass your_password  # 设置密码
-
-# 重启 Redis
-sudo service redis-server restart
+cd E:\Redis-8.6.1-Windows-x64-msys2
+.\redis-server.exe redis.conf 
 ```
 
 **方式二：使用 Docker Desktop**

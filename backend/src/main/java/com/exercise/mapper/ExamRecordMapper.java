@@ -14,4 +14,6 @@ public interface ExamRecordMapper {
     int update(ExamRecord record);
     
     List<ExamRecord> selectByUserId(@Param("userId") Long userId);
+    
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status, @Param("correctCount") Integer correctCount, @Param("score") java.math.BigDecimal score);
 }

@@ -13,6 +13,8 @@ public class ExamQuestion {
     private String userAnswer;
     private Integer isCorrect;
     private Integer isAnswered;
+    private Integer aiScore;
+    private String aiComment;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 }

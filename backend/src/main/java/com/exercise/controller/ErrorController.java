@@ -7,6 +7,8 @@ import com.exercise.service.QuestionRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/error")
 public class ErrorController {
@@ -29,5 +31,21 @@ public class ErrorController {
     public Result<Boolean> delete(@PathVariable Long recordId) {
         boolean success = questionRecordService.removeError(recordId);
         return success ? Result.success(true) : Result.error("删除失败");
+    }
+    
+    @GetMapping("/high-error")
+    public Result<List<QuestionRecord>> highError(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        List<QuestionRecord> list = questionRecordService.getHighErrorQuestions(userId, limit);
+        return Result.success(list);
+    }
+    
+    @GetMapping("/recent")
+    public Result<List<QuestionRecord>> recent(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        List<QuestionRecord> list = questionRecordService.getRecentRecords(userId, limit);
+        return Result.success(list);
     }
 }

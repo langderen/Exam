@@ -5,11 +5,14 @@
         <h2>{{ book?.bookName }}</h2>
         <span class="progress">第 {{ currentIndex }} / {{ totalCount }} 题</span>
       </div>
-      <div class="mode-switch">
-        <el-radio-group v-model="mode" @change="handleModeChange">
-          <el-radio-button value="sequence">顺序刷题</el-radio-button>
-          <el-radio-button value="random">随机刷题</el-radio-button>
-        </el-radio-group>
+      <div class="header-actions">
+        <div class="mode-switch">
+          <el-radio-group v-model="mode" @change="handleModeChange">
+            <el-radio-button value="sequence">顺序刷题</el-radio-button>
+            <el-radio-button value="random">随机刷题</el-radio-button>
+          </el-radio-group>
+        </div>
+        <el-button type="danger" plain @click="handleRedo" :loading="redoing">重做</el-button>
       </div>
     </div>
     
@@ -33,6 +36,12 @@
         <div class="question-content">
           <p>{{ question.content }}</p>
           <img v-if="question.contentImage" :src="question.contentImage" class="question-image" />
+          <div v-if="question.attachment" class="question-attachment">
+            <p><strong>题目附件：</strong></p>
+            <el-link :href="question.attachment" target="_blank" type="primary">
+              {{ question.attachmentName || '下载附件' }}
+            </el-link>
+          </div>
         </div>
         
         <div class="question-options">
@@ -71,6 +80,22 @@
               placeholder="请输入答案"
               :disabled="submitted"
             />
+            <div class="answer-attachment-section">
+              <el-upload
+                class="file-uploader"
+                :show-file-list="false"
+                :before-upload="handleAnswerAttachmentUpload"
+                :disabled="submitted"
+              >
+                <el-button type="primary" size="small" :disabled="submitted">上传答案附件</el-button>
+              </el-upload>
+              <div v-if="answerAttachment" class="attachment-info">
+                <el-link :href="answerAttachment" target="_blank" type="primary">
+                  {{ answerAttachmentName || '查看附件' }}
+                </el-link>
+                <el-button v-if="!submitted" type="danger" link size="small" @click="clearAnswerAttachment">删除</el-button>
+              </div>
+            </div>
           </template>
         </div>
         
@@ -84,10 +109,33 @@
           <div class="answer-info">
             <p><strong>正确答案：</strong>{{ question.answer }}</p>
             <p><strong>您的答案：</strong>{{ formatUserAnswer() }}</p>
+            <p v-if="submittedRecord?.answerAttachment">
+              <strong>您的附件：</strong>
+              <el-link :href="submittedRecord.answerAttachment" target="_blank" type="primary">
+                {{ submittedRecord.answerAttachmentName || '查看附件' }}
+              </el-link>
+            </p>
           </div>
           <div class="analysis" v-if="question.analysis">
             <p><strong>解析：</strong></p>
             <p>{{ question.analysis }}</p>
+          </div>
+          
+          <div class="ai-analysis" v-if="showAiAnalysis">
+            <p><strong>AI解析：</strong></p>
+            <p>{{ aiAnalysis }}</p>
+          </div>
+          
+          <div class="ai-actions">
+            <el-button 
+              type="primary" 
+              plain 
+              @click="handleAiAnalysis" 
+              :loading="aiAnalysisLoading"
+            >
+              <el-icon v-if="!aiAnalysisLoading"><MagicStick /></el-icon>
+              {{ aiAnalysisLoading ? 'AI解析中' : 'AI解析' }}
+            </el-button>
           </div>
         </div>
         
@@ -147,10 +195,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { MagicStick } from '@element-plus/icons-vue'
 import { getBookDetail, checkPurchased, purchaseBook } from '@/api/book'
-import { getSequence, getRandom, submitAnswer as submitAnswerApi, getQuestionDetail, jumpToQuestion as jumpToQuestionApi, getAnswerStatus, getUserQuestionRecord } from '@/api/question'
+import { getSequence, getRandom, submitAnswer as submitAnswerApi, getQuestionDetail, jumpToQuestion as jumpToQuestionApi, getAnswerStatus, getUserQuestionRecord, clearRecords } from '@/api/question'
 import { addCollection, removeCollection } from '@/api/collection'
+import { generateAnalysis } from '@/api/ai'
+import { uploadFile } from '@/api/upload'
 import { useUserStore } from '@/store/user'
 import { useExerciseStore } from '@/store/exercise'
 import AnswerCard from '@/components/AnswerCard.vue'
@@ -175,6 +226,13 @@ const answerStatusList = ref([])
 const needPurchase = ref(false)
 const purchaseDialogVisible = ref(false)
 const purchasing = ref(false)
+const redoing = ref(false)
+const aiAnalysisLoading = ref(false)
+const aiAnalysis = ref('')
+const showAiAnalysis = ref(false)
+const answerAttachment = ref('')
+const answerAttachmentName = ref('')
+const submittedRecord = ref(null)
 
 const parsedOptions = computed(() => {
   if (!question.value) return []
@@ -227,6 +285,9 @@ const loadQuestion = async () => {
   userAnswer.value = ''
   userAnswers.value = []
   isCorrect.value = false
+  answerAttachment.value = ''
+  answerAttachmentName.value = ''
+  submittedRecord.value = null
   
   const bookId = route.params.bookId
   
@@ -247,6 +308,7 @@ const loadQuestion = async () => {
         const recordRes = await getUserQuestionRecord(userStore.userInfo.id, res.data.id)
         if (recordRes.data) {
           const record = recordRes.data
+          submittedRecord.value = record
           submitted.value = record.isAnswered === 1
           isCorrect.value = record.isCorrect === 1
           
@@ -262,6 +324,11 @@ const loadQuestion = async () => {
             }
           } else {
             userAnswer.value = record.answer || ''
+          }
+          
+          if (record.answerAttachment) {
+            answerAttachment.value = record.answerAttachment
+            answerAttachmentName.value = record.answerAttachmentName
           }
         }
       } catch (recordError) {
@@ -326,7 +393,9 @@ const submitAnswer = async () => {
     const res = await submitAnswerApi({
       userId: userStore.userInfo.id,
       questionId: question.value.id,
-      answer
+      answer,
+      answerAttachment: answerAttachment.value,
+      answerAttachmentName: answerAttachmentName.value
     })
     
     submitted.value = true
@@ -428,6 +497,78 @@ const confirmPurchase = async () => {
 const goBack = () => {
   router.push('/books')
 }
+
+const handleRedo = async () => {
+  try {
+    await ElMessageBox.confirm('确定要重做吗？将清除该习题册的所有做题记录。', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    
+    redoing.value = true
+    await clearRecords(userStore.userInfo.id, book.value.id)
+    ElMessage.success('已清除所有做题记录')
+    
+    currentIndex.value = 1
+    exerciseStore.saveProgress(book.value.id, 1)
+    await loadAnswerStatus()
+    await loadQuestion()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error)
+    }
+  } finally {
+    redoing.value = false
+  }
+}
+
+const handleAiAnalysis = async () => {
+  if (!question.value) return
+  
+  if (!showAiAnalysis.value) {
+    try {
+      aiAnalysisLoading.value = true
+      const res = await generateAnalysis({
+        content: question.value.content,
+        options: question.value.options,
+        answer: question.value.answer,
+        typeName: question.value.typeName
+      })
+      aiAnalysis.value = res.data
+      showAiAnalysis.value = true
+    } catch (error) {
+      ElMessage.error('AI解析失败')
+    } finally {
+      aiAnalysisLoading.value = false
+    }
+  } else {
+    showAiAnalysis.value = !showAiAnalysis.value
+  }
+}
+
+const handleAnswerAttachmentUpload = async (rawFile) => {
+  const isLt10M = rawFile.size / 1024 / 1024 < 10
+  if (!isLt10M) {
+    ElMessage.error('文件大小不能超过 10MB!')
+    return false
+  }
+  
+  try {
+    const res = await uploadFile(rawFile)
+    answerAttachment.value = res.data.url
+    answerAttachmentName.value = res.data.name
+    ElMessage.success('附件上传成功')
+  } catch (error) {
+    ElMessage.error('上传失败')
+  }
+  return false
+}
+
+const clearAnswerAttachment = () => {
+  answerAttachment.value = ''
+  answerAttachmentName.value = ''
+}
 </script>
 
 <style scoped lang="scss">
@@ -456,6 +597,12 @@ const goBack = () => {
       color: #666;
       font-size: 14px;
     }
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
   }
 }
 
@@ -504,6 +651,19 @@ const goBack = () => {
     }
   }
   
+  .question-attachment {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #e4e7ed;
+    border-radius: 4px;
+    
+    p {
+      margin: 0 0 5px 0;
+      color: #606266;
+    }
+  }
+  
   .question-options {
     .options-image {
       max-width: 100%;
@@ -525,6 +685,20 @@ const goBack = () => {
       &:hover {
         border-color: #409eff;
         background: #ecf5ff;
+      }
+    }
+    
+    .answer-attachment-section {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f5f7fa;
+      border-radius: 4px;
+      
+      .attachment-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
       }
     }
   }
@@ -560,6 +734,25 @@ const goBack = () => {
         color: #666;
         line-height: 1.6;
       }
+    }
+    
+    .ai-analysis {
+      padding: 15px;
+      background: #f0f9ff;
+      border-radius: 4px;
+      margin-top: 15px;
+      border: 1px solid #bae7ff;
+      
+      p {
+        margin: 8px 0;
+        color: #333;
+        line-height: 1.8;
+        white-space: pre-wrap;
+      }
+    }
+    
+    .ai-actions {
+      margin-top: 15px;
     }
   }
   

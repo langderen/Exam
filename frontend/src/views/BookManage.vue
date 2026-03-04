@@ -8,6 +8,7 @@
         </div>
         <div class="actions">
           <el-button type="primary" @click="showAddDialog">添加题目</el-button>
+          <el-button type="success" @click="showAiGenerateDialog">AI出题</el-button>
           <el-button @click="showBatchDialog">批量导入</el-button>
           <el-button @click="goBack">返回</el-button>
         </div>
@@ -53,11 +54,8 @@
         <el-form-item label="题目图片">
           <el-upload
             class="image-uploader"
-            :action="uploadUrl"
-            name="file"
             :show-file-list="false"
-            :on-success="handleContentImageSuccess"
-            :before-upload="beforeImageUpload"
+            :before-upload="handleContentImageUpload"
           >
             <img v-if="questionForm.contentImage" :src="questionForm.contentImage" class="image-preview" />
             <el-icon v-else class="image-uploader-icon"><Plus /></el-icon>
@@ -76,11 +74,8 @@
         <el-form-item label="选项图片" v-if="questionForm.typeId !== 4 && questionForm.typeId !== 3">
           <el-upload
             class="image-uploader"
-            :action="uploadUrl"
-            name="file"
             :show-file-list="false"
-            :on-success="handleOptionsImageSuccess"
-            :before-upload="beforeImageUpload"
+            :before-upload="handleOptionsImageUpload"
           >
             <img v-if="questionForm.optionsImage" :src="questionForm.optionsImage" class="image-preview" />
             <el-icon v-else class="image-uploader-icon"><Plus /></el-icon>
@@ -116,6 +111,30 @@
             <el-option label="困难" :value="3" />
           </el-select>
         </el-form-item>
+        <el-form-item label="答题要点" v-if="questionForm.typeId === 4">
+          <el-input v-model="questionForm.keyPoints" type="textarea" :rows="2" placeholder="请输入答题要点（用于AI评分）" />
+        </el-form-item>
+        <el-form-item label="AI评分" v-if="questionForm.typeId === 4">
+          <el-switch v-model="questionForm.aiScoring" :active-value="1" :inactive-value="0" />
+          <span style="margin-left: 10px; color: #909399; font-size: 12px;">启用后，考试时将使用AI对简答题进行评分</span>
+        </el-form-item>
+        <el-form-item label="题目附件">
+          <div class="attachment-section">
+            <el-upload
+              class="file-uploader"
+              :show-file-list="false"
+              :before-upload="handleAttachmentUpload"
+            >
+              <el-button type="primary">上传附件</el-button>
+            </el-upload>
+            <div v-if="questionForm.attachment" class="attachment-info">
+              <el-link :href="questionForm.attachment" target="_blank" type="primary">
+                {{ questionForm.attachmentName || '查看附件' }}
+              </el-link>
+              <el-button type="danger" link @click="clearAttachment">删除附件</el-button>
+            </div>
+          </div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="questionDialogVisible = false">取消</el-button>
@@ -145,6 +164,51 @@
       </template>
     </el-dialog>
     
+    <el-dialog v-model="aiGenerateDialogVisible" title="AI智能出题" width="700px">
+      <el-form :model="aiGenerateForm" label-width="100px">
+        <el-form-item label="题型">
+          <el-select v-model="aiGenerateForm.typeId" placeholder="请选择题型">
+            <el-option
+              v-for="type in questionTypes"
+              :key="type.id"
+              :label="type.typeName"
+              :value="type.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="题目数量">
+          <el-input-number v-model="aiGenerateForm.count" :min="1" :max="10" />
+        </el-form-item>
+        <el-form-item label="材料">
+          <el-input
+            v-model="aiGenerateForm.material"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入题目材料（可选）"
+          />
+        </el-form-item>
+        <el-form-item label="要求">
+          <el-input
+            v-model="aiGenerateForm.requirements"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入出题要求，例如：涵盖知识点A、B、C"
+          />
+        </el-form-item>
+        <el-form-item v-if="aiGenerateForm.typeId === 4">
+          <el-alert type="info" :closable="false">
+            <template #title>
+              简答题将自动生成答题要点并启用AI评分功能
+            </template>
+          </el-alert>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="aiGenerateDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleAiGenerate" :loading="aiGenerating">生成</el-button>
+      </template>
+    </el-dialog>
+    
     <el-dialog v-model="bookDialogVisible" title="编辑习题册" width="500px">
       <el-form :model="bookForm" label-width="100px" :rules="bookRules" ref="bookFormRef">
         <el-form-item label="习题册名称" prop="bookName">
@@ -169,16 +233,17 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, MagicStick } from '@element-plus/icons-vue'
 import { getBookDetail, updateBook } from '@/api/book'
 import { getQuestionList, createQuestion, updateQuestion, deleteQuestion, batchCreateQuestions } from '@/api/question'
 import { getQuestionTypes } from '@/api/questionType'
+import { generateQuestions, judgeAnswer } from '@/api/ai'
+import { uploadImage, uploadFile } from '@/api/upload'
 
 const route = useRoute()
 const router = useRouter()
 
 const bookId = route.params.bookId
-const uploadUrl = 'http://localhost:8080/api/upload/image'
 const book = ref(null)
 const questions = ref([])
 const questionTypes = ref([])
@@ -188,6 +253,15 @@ const importing = ref(false)
 const savingBook = ref(false)
 const questionDialogVisible = ref(false)
 const batchDialogVisible = ref(false)
+const aiGenerateDialogVisible = ref(false)
+const aiGenerating = ref(false)
+const aiJudging = ref(false)
+const aiGenerateForm = ref({
+  typeId: null,
+  count: 5,
+  material: '',
+  requirements: ''
+})
 const bookDialogVisible = ref(false)
 const isEdit = ref(false)
 const questionFormRef = ref(null)
@@ -206,7 +280,11 @@ const questionForm = reactive({
   optionsImage: '',
   answer: '',
   analysis: '',
-  difficulty: 1
+  difficulty: 1,
+  attachment: '',
+  attachmentName: '',
+  keyPoints: '',
+  aiScoring: 0
 })
 
 const batchContent = ref('')
@@ -308,6 +386,8 @@ const showAddDialog = () => {
   questionForm.answer = ''
   questionForm.analysis = ''
   questionForm.difficulty = 1
+  questionForm.attachment = ''
+  questionForm.attachmentName = ''
   optionList.value = ['', '', '', '']
   multiAnswer.value = []
   questionDialogVisible.value = true
@@ -323,6 +403,10 @@ const editQuestion = (row) => {
   questionForm.analysis = row.analysis
   questionForm.difficulty = row.difficulty
   questionForm.optionsImage = row.optionsImage || ''
+  questionForm.attachment = row.attachment || ''
+  questionForm.attachmentName = row.attachmentName || ''
+  questionForm.keyPoints = row.keyPoints || ''
+  questionForm.aiScoring = row.aiScoring || 0
   
   if (row.typeId === 3) {
     optionList.value = []
@@ -403,6 +487,92 @@ const removeQuestion = async (row) => {
 const showBatchDialog = () => {
   batchContent.value = ''
   batchDialogVisible.value = true
+}
+
+const showAiGenerateDialog = () => {
+  aiGenerateForm.value = {
+    typeId: null,
+    count: 5,
+    material: '',
+    requirements: ''
+  }
+  aiGenerateDialogVisible.value = true
+}
+
+const handleAiGenerate = async () => {
+  if (!aiGenerateForm.value.typeId) {
+    ElMessage.warning('请选择题型')
+    return
+  }
+  
+  const selectedType = questionTypes.value.find(t => t.id === aiGenerateForm.value.typeId)
+  
+  aiGenerating.value = true
+  try {
+    const res = await generateQuestions({
+      typeId: aiGenerateForm.value.typeId,
+      typeName: selectedType?.typeName,
+      count: aiGenerateForm.value.count,
+      material: aiGenerateForm.value.material,
+      requirements: aiGenerateForm.value.requirements
+    })
+    
+    const questionsData = JSON.parse(res.data)
+    
+    for (const q of questionsData) {
+      const options = Array.isArray(q.options) ? JSON.stringify(q.options) : q.options
+      const questionData = {
+        bookId: bookId,
+        typeId: aiGenerateForm.value.typeId,
+        content: q.content,
+        options: options,
+        answer: q.answer,
+        analysis: q.analysis,
+        difficulty: q.difficulty || 1
+      }
+      
+      if (aiGenerateForm.value.typeId === 4) {
+        questionData.keyPoints = q.keyPoints || ''
+        questionData.aiScoring = q.aiScoring || 1
+      }
+      
+      await createQuestion(questionData)
+    }
+    
+    ElMessage.success(`成功生成${questionsData.length}道题目`)
+    aiGenerateDialogVisible.value = false
+    loadQuestions()
+  } catch (error) {
+    ElMessage.error('AI生成失败')
+  } finally {
+    aiGenerating.value = false
+  }
+}
+
+const handleAiJudge = async () => {
+  if (!questionForm.content || !questionForm.answer || !questionForm.keyPoints) {
+    ElMessage.warning('请填写题目内容、答案和答题要点')
+    return
+  }
+  
+  aiJudging.value = true
+  try {
+    const res = await judgeAnswer({
+      question: questionForm.content,
+      correctAnswer: questionForm.answer,
+      keyPoints: questionForm.keyPoints,
+      userAnswer: questionForm.answer
+    })
+    
+    ElMessageBox.alert(res.data, 'AI评分结果', {
+      confirmButtonText: '确定',
+      dangerouslyUseHTMLString: true
+    })
+  } catch (error) {
+    ElMessage.error('AI评分失败')
+  } finally {
+    aiJudging.value = false
+  }
 }
 
 const importBatch = async () => {
@@ -486,7 +656,7 @@ const saveBook = async () => {
   }
 }
 
-const beforeImageUpload = (rawFile) => {
+const handleContentImageUpload = async (rawFile) => {
   const isImage = rawFile.type.startsWith('image/')
   const isLt5M = rawFile.size / 1024 / 1024 < 5
 
@@ -498,25 +668,61 @@ const beforeImageUpload = (rawFile) => {
     ElMessage.error('图片大小不能超过 5MB!')
     return false
   }
-  return true
+  
+  try {
+    const res = await uploadImage(rawFile)
+    questionForm.contentImage = res.data
+    ElMessage.success('上传成功')
+  } catch (error) {
+    ElMessage.error('上传失败')
+  }
+  return false
 }
 
-const handleContentImageSuccess = (response) => {
-  if (response.code === 200) {
-    questionForm.contentImage = response.data
-    ElMessage.success('上传成功')
-  } else {
-    ElMessage.error(response.message || '上传失败')
+const handleOptionsImageUpload = async (rawFile) => {
+  const isImage = rawFile.type.startsWith('image/')
+  const isLt5M = rawFile.size / 1024 / 1024 < 5
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
   }
+  if (!isLt5M) {
+    ElMessage.error('图片大小不能超过 5MB!')
+    return false
+  }
+  
+  try {
+    const res = await uploadImage(rawFile)
+    questionForm.optionsImage = res.data
+    ElMessage.success('上传成功')
+  } catch (error) {
+    ElMessage.error('上传失败')
+  }
+  return false
 }
 
-const handleOptionsImageSuccess = (response) => {
-  if (response.code === 200) {
-    questionForm.optionsImage = response.data
-    ElMessage.success('上传成功')
-  } else {
-    ElMessage.error(response.message || '上传失败')
+const handleAttachmentUpload = async (rawFile) => {
+  const isLt10M = rawFile.size / 1024 / 1024 < 10
+  if (!isLt10M) {
+    ElMessage.error('文件大小不能超过 10MB!')
+    return false
   }
+  
+  try {
+    const res = await uploadFile(rawFile)
+    questionForm.attachment = res.data.url
+    questionForm.attachmentName = res.data.name
+    ElMessage.success('上传成功')
+  } catch (error) {
+    ElMessage.error('上传失败')
+  }
+  return false
+}
+
+const clearAttachment = () => {
+  questionForm.attachment = ''
+  questionForm.attachmentName = ''
 }
 
 const goBack = () => {
@@ -605,5 +811,17 @@ onMounted(() => {
   height: 148px;
   display: block;
   object-fit: cover;
+}
+
+.attachment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  
+  .attachment-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 }
 </style>

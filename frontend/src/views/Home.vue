@@ -100,6 +100,27 @@
       </el-row>
     </div>
     
+    <div class="error-section" v-if="highErrorQuestions.length > 0">
+      <div class="section-header">
+        <h3>高频错题</h3>
+        <el-button type="primary" text @click="$router.push('/error')">查看全部</el-button>
+      </div>
+      <el-row :gutter="20">
+        <el-col :span="8" v-for="item in highErrorQuestions" :key="item.id">
+          <el-card shadow="hover" class="error-card" @click="goToQuestion(item)">
+            <div class="error-header">
+              <el-tag size="small" type="danger">错{{ item.errorCount || 1 }}次</el-tag>
+              <el-tag size="small" type="info">{{ item.question?.typeName }}</el-tag>
+            </div>
+            <p class="error-content">{{ item.question?.content?.substring(0, 50) }}{{ item.question?.content?.length > 50 ? '...' : '' }}</p>
+            <div class="error-footer">
+              <span class="error-book">来自：{{ item.question?.bookName || '习题册' }}</span>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+    
     <el-dialog v-model="purchaseDialogVisible" title="购买习题册" width="400px">
       <div class="purchase-info" v-if="selectedBook">
         <p><strong>习题册名称：</strong>{{ selectedBook.bookName }}</p>
@@ -119,6 +140,7 @@ import { useRouter } from 'vue-router'
 import { getBookListWithPurchase, getBookDetail, purchaseBook } from '@/api/book'
 import { getCollectionList } from '@/api/collection'
 import { getUserExamRecords } from '@/api/exam'
+import { getHighErrorQuestions } from '@/api/error'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 
@@ -136,6 +158,7 @@ const books = ref([])
 const purchaseDialogVisible = ref(false)
 const selectedBook = ref(null)
 const purchasing = ref(false)
+const highErrorQuestions = ref([])
 
 onMounted(async () => {
   await loadData()
@@ -181,6 +204,13 @@ const loadData = async () => {
     }
     
     stats.value.userCount = 100
+    
+    try {
+      const highErrorRes = await getHighErrorQuestions(userStore.userInfo.id, 5)
+      highErrorQuestions.value = highErrorRes.data || []
+    } catch (e) {
+      console.error(e)
+    }
   } catch (error) {
     console.error(error)
   }
@@ -217,6 +247,13 @@ const confirmPurchase = async () => {
     purchasing.value = false
   }
 }
+
+const goToQuestion = (item) => {
+  if (item.question?.bookId) {
+    router.push(`/exercise/${item.question.bookId}?questionId=${item.question.id}`)
+  }
+}
+
 </script>
 
 <style scoped lang="scss">
@@ -362,6 +399,57 @@ const confirmPurchase = async () => {
   p {
     margin: 10px 0;
     font-size: 14px;
+  }
+}
+
+.error-section {
+  margin-top: 30px;
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h3 {
+      font-size: 18px;
+      color: #333;
+    }
+  }
+}
+
+.error-card {
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+  
+  &:hover {
+    transform: translateY(-4px);
+  }
+  
+  .error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .error-content {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+    height: 44px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  
+  .error-footer {
+    color: #999;
+    font-size: 12px;
+    
+    .error-book {
+      display: block;
+    }
   }
 }
 </style>

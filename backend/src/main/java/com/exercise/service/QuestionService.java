@@ -41,4 +41,6 @@ public interface QuestionService {
     void deleteQuestion(Long id);
     
     void batchCreate(List<Question> questions);
+    
+    void clearUserRecords(Long userId, Long bookId);
 }

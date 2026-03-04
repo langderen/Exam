@@ -10,25 +10,27 @@
         <result column="user_answer" property="userAnswer"/>
         <result column="is_correct" property="isCorrect"/>
         <result column="is_answered" property="isAnswered"/>
+        <result column="ai_score" property="aiScore"/>
+        <result column="ai_comment" property="aiComment"/>
         <result column="create_time" property="createTime"/>
     </resultMap>
     
     <insert id="insert" parameterType="com.exercise.entity.ExamQuestion">
-        INSERT INTO exam_question (exam_id, question_id, question_seq, user_answer, is_correct, is_answered)
-        VALUES (#{examId}, #{questionId}, #{questionSeq}, #{userAnswer}, #{isCorrect}, #{isAnswered})
+        INSERT INTO exam_question (exam_id, question_id, question_seq, user_answer, is_correct, is_answered, ai_score, ai_comment)
+        VALUES (#{examId}, #{questionId}, #{questionSeq}, #{userAnswer}, #{isCorrect}, #{isAnswered}, #{aiScore}, #{aiComment})
     </insert>
     
     <insert id="insertBatch" parameterType="java.util.List">
-        INSERT INTO exam_question (exam_id, question_id, question_seq, user_answer, is_correct, is_answered)
+        INSERT INTO exam_question (exam_id, question_id, question_seq, user_answer, is_correct, is_answered, ai_score, ai_comment)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.examId}, #{item.questionId}, #{item.questionSeq}, #{item.userAnswer}, #{item.isCorrect}, #{item.isAnswered})
+            (#{item.examId}, #{item.questionId}, #{item.questionSeq}, #{item.userAnswer}, #{item.isCorrect}, #{item.isAnswered}, #{item.aiScore}, #{item.aiComment})
         </foreach>
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.ExamQuestion">
         UPDATE exam_question
-        SET user_answer = #{userAnswer}, is_correct = #{isCorrect}, is_answered = #{isAnswered}
+        SET user_answer = #{userAnswer}, is_correct = #{isCorrect}, is_answered = #{isAnswered}, ai_score = #{aiScore}, ai_comment = #{aiComment}
         WHERE id = #{id}
     </update>
     
@@ -49,6 +51,12 @@
     <update id="updateCorrect">
         UPDATE exam_question
         SET is_correct = #{isCorrect}
+        WHERE exam_id = #{examId} AND question_id = #{questionId}
+    </update>
+    
+    <update id="updateAiScore">
+        UPDATE exam_question
+        SET is_correct = #{isCorrect}, ai_score = #{aiScore}, ai_comment = #{aiComment}
         WHERE exam_id = #{examId} AND question_id = #{questionId}
     </update>
     

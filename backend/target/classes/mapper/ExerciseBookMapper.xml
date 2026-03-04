@@ -51,6 +51,34 @@
         ORDER BY b.create_time DESC
     </select>
     
+    <select id="selectListWithPurchasePaged" resultMap="BaseResultMap">
+        SELECT b.*, u.username as creator_name,
+               CASE WHEN p.id IS NOT NULL OR b.creator_id = #{userId} THEN 1 ELSE 0 END as purchased
+        FROM exercise_book b
+        LEFT JOIN sys_user u ON b.creator_id = u.id
+        LEFT JOIN book_purchase p ON b.id = p.book_id AND p.user_id = #{userId}
+        <where>
+            b.status = 1 AND (b.is_public = 1 OR b.creator_id IS NULL)
+            <if test="bookName != null and bookName != ''">
+                AND b.book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+        </where>
+        ORDER BY b.create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    
+    <select id="countListWithPurchase" resultType="int">
+        SELECT COUNT(*)
+        FROM exercise_book b
+        LEFT JOIN book_purchase p ON b.id = p.book_id AND p.user_id = #{userId}
+        <where>
+            b.status = 1 AND (b.is_public = 1 OR b.creator_id IS NULL)
+            <if test="bookName != null and bookName != ''">
+                AND b.book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+        </where>
+    </select>
+    
     <select id="selectDetailById" resultMap="DetailResultMap">
         SELECT b.*,
                (SELECT COUNT(*) FROM question WHERE book_id = b.id) as total_count,

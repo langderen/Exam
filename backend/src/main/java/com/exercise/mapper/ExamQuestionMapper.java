@@ -21,5 +21,7 @@ public interface ExamQuestionMapper {
     
     int updateCorrect(@Param("examId") Long examId, @Param("questionId") Long questionId, @Param("isCorrect") Integer isCorrect);
     
+    int updateAiScore(@Param("examId") Long examId, @Param("questionId") Long questionId, @Param("isCorrect") Integer isCorrect, @Param("aiScore") Integer aiScore, @Param("aiComment") String aiComment);
+    
     int deleteByExamId(@Param("examId") Long examId);
 }

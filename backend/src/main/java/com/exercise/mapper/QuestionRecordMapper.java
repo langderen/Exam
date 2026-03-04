@@ -23,7 +23,13 @@ public interface QuestionRecordMapper {
     
     int deleteById(@Param("id") Long id);
     
+    int deleteByUserAndBook(@Param("userId") Long userId, @Param("bookId") Long bookId);
+    
     QuestionRecord selectByUserAndQuestion(@Param("userId") Long userId, @Param("questionId") Long questionId);
     
     List<QuestionRecord> selectAnswerStatusByBook(@Param("userId") Long userId, @Param("bookId") Long bookId);
+    
+    List<QuestionRecord> selectHighErrorQuestions(@Param("userId") Long userId, @Param("limit") Integer limit);
+    
+    List<QuestionRecord> selectRecentRecords(@Param("userId") Long userId, @Param("limit") Integer limit);
 }

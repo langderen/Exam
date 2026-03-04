@@ -121,4 +121,14 @@ public class QuestionController {
             return Result.error(e.getMessage());
         }
     }
+    
+    @DeleteMapping("/records/{userId}/{bookId}")
+    public Result<Void> clearRecords(@PathVariable Long userId, @PathVariable Long bookId) {
+        try {
+            questionService.clearUserRecords(userId, bookId);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }

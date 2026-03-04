@@ -85,6 +85,8 @@ public class QuestionServiceImpl implements QuestionService {
         record.setBookId(question.getBookId());
         record.setQuestionSeq(seq);
         record.setAnswer(dto.getAnswer());
+        record.setAnswerAttachment(dto.getAnswerAttachment());
+        record.setAnswerAttachmentName(dto.getAnswerAttachmentName());
         record.setIsCorrect(isCorrect ? 1 : 0);
         record.setIsAnswered(1);
         questionRecordMapper.insert(record);
@@ -230,5 +232,10 @@ public class QuestionServiceImpl implements QuestionService {
         for (Question question : questions) {
             questionMapper.insert(question);
         }
+    }
+    
+    @Override
+    public void clearUserRecords(Long userId, Long bookId) {
+        questionRecordMapper.deleteByUserAndBook(userId, bookId);
     }
 }

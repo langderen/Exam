@@ -45,6 +45,12 @@ public class ExamController {
         return Result.success(result);
     }
     
+    @GetMapping("/result/{examId}")
+    public Result<ExamResultVO> getResult(@PathVariable Long examId) {
+        ExamResultVO result = examService.getExamResult(examId);
+        return Result.success(result);
+    }
+    
     @GetMapping("/questions/{examId}")
     public Result<List<ExamQuestion>> getQuestions(@PathVariable Long examId) {
         List<ExamQuestion> questions = examService.getExamQuestions(examId);

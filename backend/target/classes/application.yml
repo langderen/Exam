@@ -38,6 +38,12 @@ spring:
 upload:
   path: D:/uploads
 
+ai:
+  api:
+    url: http://localhost:11434/api/chat
+    key: 
+    model: qwen3:8b
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.exercise.entity

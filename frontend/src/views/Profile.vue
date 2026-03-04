@@ -168,7 +168,7 @@
             <el-table-column label="操作" width="150">
               <template #default="{ row }">
                 <el-button type="primary" link @click="viewExamDetail(row)">详情</el-button>
-                <el-button type="success" link @click="retakeExam(row)">重考</el-button>
+
               </template>
             </el-table-column>
           </el-table>
@@ -325,29 +325,6 @@
         <el-button type="primary" @click="confirmRecharge" :loading="recharging">确认充值</el-button>
       </template>
     </el-dialog>
-    
-    <el-dialog v-model="examDetailDialogVisible" title="考试详情" width="600px">
-      <el-descriptions :column="2" border v-if="examDetail">
-        <el-descriptions-item label="考试编号">{{ examDetail.id }}</el-descriptions-item>
-        <el-descriptions-item label="考试名称">{{ examDetail.examName }}</el-descriptions-item>
-        <el-descriptions-item label="习题册名称" :span="2">{{ examDetail.bookName }}</el-descriptions-item>
-        <el-descriptions-item label="总题数">{{ examDetail.totalCount }}</el-descriptions-item>
-        <el-descriptions-item label="正确数">{{ examDetail.correctCount }}</el-descriptions-item>
-        <el-descriptions-item label="得分">
-          <el-tag :type="getScoreTag(examDetail.score)">{{ examDetail.score }}分</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="正确率">
-          <el-tag :type="examDetail.correctRate >= 60 ? 'success' : 'danger'">
-            {{ examDetail.correctRate }}%
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="考试时间" :span="2">{{ examDetail.createTime }}</el-descriptions-item>
-      </el-descriptions>
-      <template #footer>
-        <el-button @click="examDetailDialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="retakeExam(examDetail)">重新考试</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -411,8 +388,6 @@ const examRecords = ref([])
 const loadingExams = ref(false)
 const wallet = ref(null)
 const transactions = ref([])
-const examDetailDialogVisible = ref(false)
-const examDetail = ref(null)
 
 const rechargeForm = reactive({
   amount: 10
@@ -592,8 +567,7 @@ const goToExercise = (row) => {
 }
 
 const viewExamDetail = (row) => {
-  examDetail.value = row
-  examDetailDialogVisible.value = true
+  router.push(`/exam-result/${row.id}`)
 }
 
 const retakeExam = (row) => {

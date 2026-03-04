@@ -10,6 +10,7 @@ public class ExamResultVO {
     private Integer totalCount;
     private Integer correctCount;
     private BigDecimal score;
+    private String scoringStatus;
     private List<QuestionResultVO> questions;
     
     @Data
@@ -21,5 +22,8 @@ public class ExamResultVO {
         private String userAnswer;
         private Integer isCorrect;
         private String analysis;
+        private Integer aiScoring;
+        private Integer aiScore;
+        private String aiComment;
     }
 }

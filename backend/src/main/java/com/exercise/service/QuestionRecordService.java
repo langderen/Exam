@@ -10,4 +10,8 @@ public interface QuestionRecordService {
     boolean removeError(Long recordId);
     
     int countErrors(Long userId, Long bookId, Long typeId);
+    
+    List<QuestionRecord> getHighErrorQuestions(Long userId, Integer limit);
+    
+    List<QuestionRecord> getRecentRecords(Long userId, Integer limit);
 }

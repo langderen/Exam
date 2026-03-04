@@ -6,13 +6,17 @@
         <id column="id" property="id"/>
         <result column="book_id" property="bookId"/>
         <result column="type_id" property="typeId"/>
-        <result column="content" property="content"/>
-        <result column="content_image" property="contentImage"/>
-        <result column="options" property="options"/>
-        <result column="options_image" property="optionsImage"/>
-        <result column="answer" property="answer"/>
-        <result column="analysis" property="analysis"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="content_image" property="contentImage" jdbcType="VARCHAR"/>
+        <result column="options" property="options" jdbcType="VARCHAR"/>
+        <result column="options_image" property="optionsImage" jdbcType="VARCHAR"/>
+        <result column="answer" property="answer" jdbcType="VARCHAR"/>
+        <result column="analysis" property="analysis" jdbcType="VARCHAR"/>
         <result column="difficulty" property="difficulty"/>
+        <result column="attachment" property="attachment" jdbcType="VARCHAR"/>
+        <result column="attachment_name" property="attachmentName" jdbcType="VARCHAR"/>
+        <result column="ai_scoring" property="aiScoring"/>
+        <result column="key_points" property="keyPoints" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime"/>
         <result column="type_name" property="typeName"/>
         <result column="book_name" property="bookName"/>
@@ -91,13 +95,14 @@
     </select>
     
     <insert id="insert" parameterType="com.exercise.entity.Question" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO question (book_id, type_id, content, content_image, options, options_image, answer, analysis, difficulty)
-        VALUES (#{bookId}, #{typeId}, #{content}, #{contentImage}, #{options}, #{optionsImage}, #{answer}, #{analysis}, #{difficulty})
+        INSERT INTO question (book_id, type_id, content, content_image, options, options_image, answer, analysis, difficulty, attachment, attachment_name, ai_scoring, key_points)
+        VALUES (#{bookId}, #{typeId}, #{content}, #{contentImage}, #{options}, #{optionsImage}, #{answer}, #{analysis}, #{difficulty}, #{attachment}, #{attachmentName}, #{aiScoring}, #{keyPoints})
     </insert>
     
     <update id="update" parameterType="com.exercise.entity.Question">
         UPDATE question
         <set>
+            <if test="typeId != null">type_id = #{typeId},</if>
             <if test="content != null">content = #{content},</if>
             <if test="contentImage != null">content_image = #{contentImage},</if>
             <if test="options != null">options = #{options},</if>
@@ -105,6 +110,10 @@
             <if test="answer != null">answer = #{answer},</if>
             <if test="analysis != null">analysis = #{analysis},</if>
             <if test="difficulty != null">difficulty = #{difficulty},</if>
+            <if test="attachment != null">attachment = #{attachment},</if>
+            <if test="attachmentName != null">attachment_name = #{attachmentName},</if>
+            <if test="aiScoring != null">ai_scoring = #{aiScoring},</if>
+            <if test="keyPoints != null">key_points = #{keyPoints},</if>
         </set>
         WHERE id = #{id}
     </update>

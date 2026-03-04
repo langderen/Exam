@@ -16,6 +16,10 @@ export function submitExam(data) {
   return request.post('/exam/submit', data)
 }
 
+export function getExamResult(examId) {
+  return request.get(`/exam/result/${examId}`)
+}
+
 export function getExamQuestions(examId) {
   return request.get(`/exam/questions/${examId}`)
 }
