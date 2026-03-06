@@ -6,6 +6,19 @@ const request = axios.create({
   timeout: 60000
 })
 
+request.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('satoken')
+    if (token) {
+      config.headers['satoken'] = token
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
+
 request.interceptors.response.use(
   response => {
     const res = response.data
@@ -16,7 +29,14 @@ request.interceptors.response.use(
     return res
   },
   error => {
-    ElMessage.error(error.message || '网络错误')
+    if (error.response && error.response.status === 401) {
+      ElMessage.error('登录已过期，请重新登录')
+      localStorage.removeItem('satoken')
+      localStorage.removeItem('userInfo')
+      window.location.href = '/login'
+    } else {
+      ElMessage.error(error.message || '网络错误')
+    }
     return Promise.reject(error)
   }
 )

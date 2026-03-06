@@ -260,50 +260,114 @@ const goToQuestion = (item) => {
 .home-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
+  min-height: calc(100vh - 100px);
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 }
 
 .welcome-section {
   text-align: center;
   padding: 40px 0;
   
+  @media (max-width: 768px) {
+    padding: 20px 0;
+  }
+  
   h1 {
     font-size: 32px;
     color: #333;
     margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    
+    @media (max-width: 768px) {
+      font-size: 24px;
+    }
   }
   
   p {
     color: #666;
     font-size: 16px;
+    
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
   }
 }
 
 .stats-section {
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+  
+  .el-col {
+    @media (max-width: 768px) {
+      margin-bottom: 10px;
+    }
+  }
 }
 
 .stat-card {
   display: flex;
   align-items: center;
   padding: 20px;
+  background: linear-gradient(145deg, #ffffff, #b8bcc2);
+  border: none;
+  box-shadow: 
+    8px 8px 16px #b8bcc2,
+    -8px -8px 16px #ffffff,
+    inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: linear-gradient(145deg, #b8bcc2,#ffffff );
+    box-shadow: 
+      12px 12px 24px #b8bcc2,
+      -12px -12px 24px #ffffff,
+      inset 2px 2px 4px rgba(0, 0, 0, 0.08),
+      inset -2px -2px 4px rgba(255, 255, 255, 0.6);
+
+  }
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
   
   :deep(.el-card__body) {
     display: flex;
     align-items: center;
     width: 100%;
     padding: 20px;
+    background: transparent;
+    
+    @media (max-width: 768px) {
+      padding: 15px;
+    }
   }
 }
 
 .stat-icon {
   width: 64px;
   height: 64px;
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #fff;
   margin-right: 16px;
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .stat-info {
@@ -311,12 +375,21 @@ const goToQuestion = (item) => {
     font-size: 28px;
     font-weight: bold;
     color: #333;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    
+    @media (max-width: 768px) {
+      font-size: 22px;
+    }
   }
   
   .stat-label {
     font-size: 14px;
     color: #999;
     margin-top: 4px;
+    
+    @media (max-width: 768px) {
+      font-size: 12px;
+    }
   }
 }
 
@@ -327,9 +400,23 @@ const goToQuestion = (item) => {
     align-items: center;
     margin-bottom: 20px;
     
+    @media (max-width: 768px) {
+      margin-bottom: 15px;
+    }
+    
     h3 {
       font-size: 18px;
       color: #333;
+      
+      @media (max-width: 768px) {
+        font-size: 16px;
+      }
+    }
+  }
+  
+  .el-col {
+    @media (max-width: 768px) {
+      margin-bottom: 15px;
     }
   }
 }
@@ -348,6 +435,12 @@ const goToQuestion = (item) => {
     align-items: center;
     margin-bottom: 10px;
     
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
     h4 {
       font-size: 16px;
       color: #333;
@@ -362,6 +455,11 @@ const goToQuestion = (item) => {
     height: 42px;
     overflow: hidden;
     margin-bottom: 15px;
+    
+    @media (max-width: 768px) {
+      font-size: 13px;
+      height: 38px;
+    }
   }
   
   .book-stats {
@@ -370,6 +468,11 @@ const goToQuestion = (item) => {
     color: #999;
     font-size: 12px;
     margin-bottom: 15px;
+    
+    @media (max-width: 768px) {
+      gap: 10px;
+      font-size: 11px;
+    }
     
     span {
       display: flex;
@@ -382,6 +485,11 @@ const goToQuestion = (item) => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 10px;
+    }
     
     span {
       color: #999;
@@ -405,15 +513,33 @@ const goToQuestion = (item) => {
 .error-section {
   margin-top: 30px;
   
+  @media (max-width: 768px) {
+    margin-top: 20px;
+  }
+  
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
     
+    @media (max-width: 768px) {
+      margin-bottom: 15px;
+    }
+    
     h3 {
       font-size: 18px;
       color: #333;
+      
+      @media (max-width: 768px) {
+        font-size: 16px;
+      }
+    }
+  }
+  
+  .el-col {
+    @media (max-width: 768px) {
+      margin-bottom: 15px;
     }
   }
 }

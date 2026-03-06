@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.exercise.common.PageResult;
 import com.exercise.common.Result;
 import com.exercise.entity.ExerciseBook;
@@ -45,12 +46,14 @@ public class ExerciseBookController {
     }
     
     @GetMapping("/my")
+    @SaCheckLogin
     public Result<List<ExerciseBook>> myBooks(@RequestParam Long userId) {
         List<ExerciseBook> list = exerciseBookService.getMyBooks(userId);
         return Result.success(list);
     }
     
     @PostMapping("/create")
+    @SaCheckLogin
     public Result<Void> create(@RequestBody ExerciseBook book) {
         try {
             exerciseBookService.createBook(book);
@@ -61,6 +64,7 @@ public class ExerciseBookController {
     }
     
     @PutMapping("/update")
+    @SaCheckLogin
     public Result<Void> update(@RequestBody ExerciseBook book) {
         try {
             exerciseBookService.updateBook(book);
@@ -71,6 +75,7 @@ public class ExerciseBookController {
     }
     
     @PutMapping("/status/{id}")
+    @SaCheckLogin
     public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
         try {
             exerciseBookService.updateStatus(id, status);
@@ -81,6 +86,7 @@ public class ExerciseBookController {
     }
     
     @DeleteMapping("/{id}")
+    @SaCheckLogin
     public Result<Void> delete(@PathVariable Long id) {
         try {
             exerciseBookService.deleteBook(id);
@@ -97,6 +103,7 @@ public class ExerciseBookController {
     }
     
     @PutMapping("/price/{id}")
+    @SaCheckLogin
     public Result<Void> updatePrice(@PathVariable Long id, @RequestParam java.math.BigDecimal price) {
         try {
             exerciseBookService.updatePrice(id, price);

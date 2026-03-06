@@ -174,6 +174,10 @@ const removeError = async (record) => {
     background: #fff;
     border-radius: 8px;
     padding: 20px;
+    
+    @media (max-width: 768px) {
+      padding: 12px;
+    }
   }
 }
 
@@ -183,6 +187,10 @@ const removeError = async (record) => {
   h2 {
     font-size: 20px;
     color: #333;
+    
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
   }
 }
 
@@ -190,6 +198,11 @@ const removeError = async (record) => {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .error-list {
@@ -205,10 +218,20 @@ const removeError = async (record) => {
     align-items: center;
     margin-bottom: 12px;
     
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
     .error-info {
       display: flex;
       align-items: center;
       gap: 10px;
+      
+      @media (max-width: 768px) {
+        flex-wrap: wrap;
+      }
       
       .book-name {
         color: #666;
@@ -232,6 +255,10 @@ const removeError = async (record) => {
       color: #333;
       line-height: 1.6;
       margin: 0;
+      
+      @media (max-width: 768px) {
+        font-size: 14px;
+      }
     }
     
     .question-image {
@@ -246,6 +273,11 @@ const removeError = async (record) => {
   .error-meta {
     display: flex;
     gap: 20px;
+    
+    @media (max-width: 768px) {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
     
     span {
       color: #999;

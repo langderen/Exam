@@ -1,5 +1,6 @@
 package com.exercise.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.exercise.entity.SysUser;
 import com.exercise.mapper.SysUserMapper;
@@ -45,11 +46,15 @@ public class SysUserServiceImpl implements SysUserService {
         if (!md5Password.equals(user.getPassword())) {
             throw new RuntimeException("密码错误");
         }
+        
+        StpUtil.login(user.getId());
+        String token = StpUtil.getTokenValue();
+        
         LoginVO vo = new LoginVO();
         vo.setId(user.getId());
         vo.setUsername(user.getUsername());
         vo.setRole(user.getRole());
-        vo.setToken("token_" + user.getId() + "_" + System.currentTimeMillis());
+        vo.setToken(token);
         return vo;
     }
     

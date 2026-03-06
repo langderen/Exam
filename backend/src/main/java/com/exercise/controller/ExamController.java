@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.exercise.common.Result;
 import com.exercise.dto.GenerateExamDTO;
 import com.exercise.dto.SaveAnswerDTO;
@@ -22,42 +23,49 @@ public class ExamController {
     private ExamService examService;
     
     @PostMapping("/generate")
+    @SaCheckLogin
     public Result<Map<String, Object>> generate(@RequestBody GenerateExamDTO dto) {
         Map<String, Object> result = examService.generateExam(dto);
         return Result.success(result);
     }
     
     @GetMapping("/question/jump/{examId}/{seq}")
+    @SaCheckLogin
     public Result<Question> jumpQuestion(@PathVariable Long examId, @PathVariable Integer seq) {
         Question question = examService.jumpToQuestion(examId, seq);
         return Result.success(question);
     }
     
     @PostMapping("/saveAnswer")
+    @SaCheckLogin
     public Result<Map<String, Object>> saveAnswer(@RequestBody SaveAnswerDTO dto) {
         Map<String, Object> result = examService.saveAnswer(dto);
         return Result.success(result);
     }
     
     @PostMapping("/submit")
+    @SaCheckLogin
     public Result<ExamResultVO> submit(@RequestBody SubmitExamDTO dto) {
         ExamResultVO result = examService.submitExam(dto);
         return Result.success(result);
     }
     
     @GetMapping("/result/{examId}")
+    @SaCheckLogin
     public Result<ExamResultVO> getResult(@PathVariable Long examId) {
         ExamResultVO result = examService.getExamResult(examId);
         return Result.success(result);
     }
     
     @GetMapping("/questions/{examId}")
+    @SaCheckLogin
     public Result<List<ExamQuestion>> getQuestions(@PathVariable Long examId) {
         List<ExamQuestion> questions = examService.getExamQuestions(examId);
         return Result.success(questions);
     }
     
     @GetMapping("/records/{userId}")
+    @SaCheckLogin
     public Result<List<ExamRecord>> getUserRecords(@PathVariable Long userId) {
         List<ExamRecord> records = examService.getUserExamRecords(userId);
         return Result.success(records);

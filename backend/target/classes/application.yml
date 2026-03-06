@@ -35,6 +35,17 @@ spring:
       password:
       database: 0
 
+sa-token:
+  token-name: satoken
+  timeout: 2592000
+  active-timeout: 1800
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-log: false
+  is-print-error: true
+  jwt-secret-key: abcdefghijklmnopqrstuvwxyz
+
 upload:
   path: D:/uploads
 

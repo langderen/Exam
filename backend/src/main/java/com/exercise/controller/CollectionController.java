@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.exercise.common.PageResult;
 import com.exercise.common.Result;
 import com.exercise.dto.CollectionDTO;
@@ -16,18 +17,21 @@ public class CollectionController {
     private QuestionCollectionService questionCollectionService;
     
     @PostMapping("/add")
+    @SaCheckLogin
     public Result<Boolean> add(@RequestBody CollectionDTO dto) {
         boolean success = questionCollectionService.add(dto);
         return success ? Result.success(true) : Result.error("收藏失败");
     }
     
     @DeleteMapping("/remove/{questionId}")
+    @SaCheckLogin
     public Result<Boolean> remove(@PathVariable Long questionId, @RequestParam Long userId) {
         boolean success = questionCollectionService.remove(userId, questionId);
         return success ? Result.success(true) : Result.error("取消收藏失败");
     }
     
     @GetMapping("/list")
+    @SaCheckLogin
     public Result<PageResult<QuestionCollection>> list(
             @RequestParam Long userId,
             @RequestParam(required = false) Long bookId,

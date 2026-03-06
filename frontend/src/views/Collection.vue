@@ -144,6 +144,10 @@ const removeCollection = async (col) => {
     background: #fff;
     border-radius: 8px;
     padding: 20px;
+    
+    @media (max-width: 768px) {
+      padding: 12px;
+    }
   }
 }
 
@@ -153,6 +157,10 @@ const removeCollection = async (col) => {
   h2 {
     font-size: 20px;
     color: #333;
+    
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
   }
 }
 
@@ -160,6 +168,11 @@ const removeCollection = async (col) => {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .collection-list {
@@ -175,10 +188,20 @@ const removeCollection = async (col) => {
     align-items: center;
     margin-bottom: 12px;
     
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
     .collection-info {
       display: flex;
       align-items: center;
       gap: 10px;
+      
+      @media (max-width: 768px) {
+        flex-wrap: wrap;
+      }
       
       .book-name {
         color: #666;
@@ -202,6 +225,10 @@ const removeCollection = async (col) => {
       color: #333;
       line-height: 1.6;
       margin: 0;
+      
+      @media (max-width: 768px) {
+        font-size: 14px;
+      }
     }
     
     .question-image {
@@ -217,6 +244,10 @@ const removeCollection = async (col) => {
     span {
       color: #999;
       font-size: 12px;
+      
+      @media (max-width: 768px) {
+        font-size: 11px;
+      }
     }
   }
 }

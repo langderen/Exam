@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.exercise.common.Result;
 import com.exercise.dto.LoginDTO;
 import com.exercise.dto.RegisterDTO;
@@ -66,6 +67,7 @@ public class SysUserController {
     }
     
     @GetMapping("/info/{id}")
+    @SaCheckLogin
     public Result<SysUser> getInfo(@PathVariable Long id) {
         SysUser user = sysUserService.getById(id);
         if (user != null) {
@@ -75,6 +77,7 @@ public class SysUserController {
     }
     
     @PutMapping("/info")
+    @SaCheckLogin
     public Result<Void> updateInfo(@RequestBody SysUser user) {
         try {
             sysUserService.updateInfo(user);
@@ -85,6 +88,7 @@ public class SysUserController {
     }
     
     @PutMapping("/password")
+    @SaCheckLogin
     public Result<Void> updatePassword(@RequestBody Map<String, Object> params) {
         try {
             Long userId = Long.parseLong(params.get("userId").toString());
@@ -98,6 +102,7 @@ public class SysUserController {
     }
     
     @GetMapping("/list")
+    @SaCheckLogin
     public Result<List<SysUser>> listUsers(@RequestParam(required = false) String role) {
         List<SysUser> users = sysUserService.listUsers(role);
         users.forEach(u -> u.setPassword(null));
@@ -105,6 +110,7 @@ public class SysUserController {
     }
     
     @DeleteMapping("/{id}")
+    @SaCheckLogin
     public Result<Void> deleteUser(@PathVariable Long id) {
         try {
             sysUserService.deleteUser(id);

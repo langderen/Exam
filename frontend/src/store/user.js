@@ -4,7 +4,7 @@ import { login as loginApi } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
   const userInfo = ref(JSON.parse(localStorage.getItem('userInfo') || 'null'))
-  const token = ref(localStorage.getItem('token') || '')
+  const token = ref(localStorage.getItem('satoken') || '')
 
   const login = async (username, password) => {
     const res = await loginApi({ username, password })
@@ -15,7 +15,7 @@ export const useUserStore = defineStore('user', () => {
     }
     token.value = res.data.token
     localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
-    localStorage.setItem('token', res.data.token)
+    localStorage.setItem('satoken', res.data.token)
     return res
   }
 
@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = null
     token.value = ''
     localStorage.removeItem('userInfo')
-    localStorage.removeItem('token')
+    localStorage.removeItem('satoken')
   }
 
   return {

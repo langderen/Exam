@@ -150,13 +150,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { getBookDetail } from '@/api/book'
 import { generateExam, submitExam as submitExamApi, jumpQuestion, saveAnswer, getExamQuestions, getExamResult } from '@/api/exam'
 import { getTypeList } from '@/api/type'
+import { checkPurchased } from '@/api/book'
 import { useUserStore } from '@/store/user'
 import AnswerCard from '@/components/AnswerCard.vue'
 
@@ -201,10 +202,31 @@ onMounted(async () => {
   const bookRes = await getBookDetail(bookId, userStore.userInfo.id)
   book.value = bookRes.data
   
+  const purchaseRes = await checkPurchased(bookId, userStore.userInfo.id)
+  if (!purchaseRes.data) {
+    ElMessage.warning('请先购买该习题册后再进行考试')
+    router.push('/books')
+    return
+  }
+  
   const typeRes = await getTypeList()
   types.value = typeRes.data
   examConfig.value.typeIds = typeRes.data.map(t => t.id)
+  
+  window.addEventListener('beforeunload', handleBeforeUnload)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+
+const handleBeforeUnload = (e) => {
+  if (examStarted.value && !examSubmitted.value) {
+    e.preventDefault()
+    e.returnValue = '考试正在进行中，确定要离开吗？未提交的答案将不会保存。'
+    return e.returnValue
+  }
+}
 
 const parseOptions = (options, typeId) => {
   if (typeId === 3) {
@@ -406,14 +428,27 @@ watch(() => questions.value, () => {
 .exam-container {
   max-width: 900px;
   margin: 0 auto;
+  padding: 10px;
+  
+  @media (max-width: 768px) {
+    padding: 5px;
+  }
 }
 
 .exam-header {
   margin-bottom: 20px;
   
+  @media (max-width: 768px) {
+    margin-bottom: 15px;
+  }
+  
   h2 {
     font-size: 20px;
     color: #333;
+    
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
   }
 }
 
@@ -434,18 +469,33 @@ watch(() => questions.value, () => {
     background: #fff;
     border-radius: 8px;
     
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+    }
+    
     span {
       color: #666;
     }
     
     .el-button {
       margin-left: auto;
+      
+      @media (max-width: 768px) {
+        margin-left: 0;
+        width: 100%;
+      }
     }
   }
   
   .exam-content {
     display: flex;
     gap: 20px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
   }
   
   .questions-list {
@@ -457,6 +507,12 @@ watch(() => questions.value, () => {
     position: sticky;
     top: 20px;
     align-self: flex-start;
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      position: static;
+      margin-top: 15px;
+    }
   }
 }
 

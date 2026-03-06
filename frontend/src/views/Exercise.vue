@@ -575,6 +575,11 @@ const clearAnswerAttachment = () => {
 .exercise-container {
   max-width: 900px;
   margin: 0 auto;
+  padding: 10px;
+  
+  @media (max-width: 768px) {
+    padding: 5px;
+  }
 }
 
 .exercise-header {
@@ -586,16 +591,36 @@ const clearAnswerAttachment = () => {
   background: #fff;
   border-radius: 8px;
   
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
   .book-info {
+    @media (max-width: 768px) {
+      text-align: center;
+      width: 100%;
+    }
+    
     h2 {
       font-size: 18px;
       color: #333;
       margin: 0 0 5px 0;
+      
+      @media (max-width: 768px) {
+        font-size: 16px;
+      }
     }
     
     .progress {
       color: #666;
       font-size: 14px;
+      
+      @media (max-width: 768px) {
+        font-size: 13px;
+      }
     }
   }
   
@@ -603,12 +628,38 @@ const clearAnswerAttachment = () => {
     display: flex;
     align-items: center;
     gap: 15px;
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .mode-switch {
+      @media (max-width: 768px) {
+        width: 100%;
+        
+        .el-radio-group {
+          width: 100%;
+          display: flex;
+          
+          .el-radio-button {
+            flex: 1;
+          }
+        }
+      }
+    }
   }
 }
 
 .exercise-content {
   display: flex;
   gap: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 }
 
 .question-section {
@@ -620,6 +671,12 @@ const clearAnswerAttachment = () => {
   position: sticky;
   top: 20px;
   align-self: flex-start;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    position: static;
+    margin-top: 15px;
+  }
 }
 
 .question-card {

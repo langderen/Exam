@@ -57,12 +57,6 @@ const routes = [
         meta: { title: '个人中心' }
       },
       {
-        path: 'exam-result/:examId',
-        name: 'ExamResult',
-        component: () => import('@/views/ExamResult.vue'),
-        meta: { title: '考试详情' }
-      },
-      {
         path: 'book-manage/:bookId',
         name: 'BookManage',
         component: () => import('@/views/BookManage.vue'),

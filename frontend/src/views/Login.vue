@@ -485,7 +485,7 @@ const handleResetPassword = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #aa8eff;
+  background-color: #f5f7fa;
   padding: 20px;
 }
 
@@ -1023,14 +1023,10 @@ const handleResetPassword = async () => {
 
 .title {
   text-align: center;
-  color: #333;
+  color: #409eff;
   margin-bottom: 30px;
   font-size: 28px;
   font-weight: bold;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .login-form {
@@ -1059,12 +1055,12 @@ const handleResetPassword = async () => {
   font-size: 16px;
   font-weight: bold;
   border-radius: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #409eff;
   border: none;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(102, 102, 102, 0.4);
   }
 }
 

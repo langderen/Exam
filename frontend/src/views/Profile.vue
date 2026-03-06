@@ -709,16 +709,28 @@ const confirmRecharge = async () => {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 }
 
 .info-card {
   max-width: 500px;
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
 }
 
 .book-header {
   margin-bottom: 20px;
   display: flex;
   justify-content: flex-end;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 15px;
+  }
 }
 
 .section-title {
@@ -727,6 +739,10 @@ const confirmRecharge = async () => {
   border-bottom: 1px solid #eee;
   color: #333;
   font-size: 16px;
+  
+  @media (max-width: 768px) {
+    font-size: 15px;
+  }
 }
 
 .wallet-section {
@@ -738,6 +754,13 @@ const confirmRecharge = async () => {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
     margin-bottom: 20px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px;
+      text-align: center;
+    }
     
     .balance-info {
       display: flex;
@@ -753,6 +776,10 @@ const confirmRecharge = async () => {
         color: #fff;
         font-size: 32px;
         font-weight: bold;
+        
+        @media (max-width: 768px) {
+          font-size: 28px;
+        }
       }
     }
   }
@@ -762,6 +789,10 @@ const confirmRecharge = async () => {
       margin-bottom: 15px;
       font-size: 16px;
       color: #333;
+      
+      @media (max-width: 768px) {
+        font-size: 15px;
+      }
     }
   }
   

@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.exercise.common.Result;
 import com.exercise.dto.GenerateExamDTO;
 import com.exercise.dto.SubmitAnswerDTO;
@@ -34,24 +35,28 @@ public class QuestionController {
     }
     
     @GetMapping("/random/{bookId}")
+    @SaCheckLogin
     public Result<Question> random(@PathVariable Long bookId, @RequestParam Long userId) {
         Question question = questionService.getRandom(bookId, userId);
         return Result.success(question);
     }
     
     @GetMapping("/jump/{bookId}/{seq}")
+    @SaCheckLogin
     public Result<Question> jump(@PathVariable Long bookId, @PathVariable Integer seq) {
         Question question = questionService.jumpToQuestion(bookId, seq);
         return Result.success(question);
     }
     
     @GetMapping("/answerStatus/{userId}/{bookId}")
+    @SaCheckLogin
     public Result<Map<String, Object>> answerStatus(@PathVariable Long userId, @PathVariable Long bookId) {
         Map<String, Object> status = questionService.getAnswerStatus(userId, bookId);
         return Result.success(status);
     }
     
     @PostMapping("/submit")
+    @SaCheckLogin
     public Result<SubmitResultVO> submit(@RequestBody SubmitAnswerDTO dto) {
         try {
             SubmitResultVO vo = questionService.submitAnswer(dto);
@@ -62,6 +67,7 @@ public class QuestionController {
     }
     
     @GetMapping("/detail/{id}")
+    @SaCheckLogin
     public Result<Question> detail(@PathVariable Long id, @RequestParam(required = false) Long userId) {
         Question question = questionService.getById(id);
         if (question != null && userId != null) {
@@ -71,18 +77,21 @@ public class QuestionController {
     }
     
     @GetMapping("/record/{userId}/{questionId}")
+    @SaCheckLogin
     public Result<QuestionRecord> getRecord(@PathVariable Long userId, @PathVariable Long questionId) {
         QuestionRecord record = questionService.getUserQuestionRecord(userId, questionId);
         return Result.success(record);
     }
     
     @GetMapping("/list/{bookId}")
+    @SaCheckLogin
     public Result<List<Question>> listByBook(@PathVariable Long bookId) {
         List<Question> questions = questionService.listByBookId(bookId);
         return Result.success(questions);
     }
     
     @PostMapping("/create")
+    @SaCheckLogin
     public Result<Void> create(@RequestBody Question question) {
         try {
             questionService.createQuestion(question);
@@ -93,6 +102,7 @@ public class QuestionController {
     }
     
     @PutMapping("/update")
+    @SaCheckLogin
     public Result<Void> update(@RequestBody Question question) {
         try {
             questionService.updateQuestion(question);
@@ -103,6 +113,7 @@ public class QuestionController {
     }
     
     @DeleteMapping("/{id}")
+    @SaCheckLogin
     public Result<Void> delete(@PathVariable Long id) {
         try {
             questionService.deleteQuestion(id);
@@ -113,6 +124,7 @@ public class QuestionController {
     }
     
     @PostMapping("/batch")
+    @SaCheckLogin
     public Result<Void> batchCreate(@RequestBody List<Question> questions) {
         try {
             questionService.batchCreate(questions);
@@ -123,6 +135,7 @@ public class QuestionController {
     }
     
     @DeleteMapping("/records/{userId}/{bookId}")
+    @SaCheckLogin
     public Result<Void> clearRecords(@PathVariable Long userId, @PathVariable Long bookId) {
         try {
             questionService.clearUserRecords(userId, bookId);

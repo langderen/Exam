@@ -740,10 +740,19 @@ onMounted(() => {
 .book-manage-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 10px;
+  
+  @media (max-width: 768px) {
+    padding: 5px;
+  }
 }
 
 .header-card {
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 15px;
+  }
 }
 
 .book-header {
@@ -751,22 +760,46 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
   .book-info {
     h2 {
       margin: 0 0 5px 0;
       color: #333;
+      
+      @media (max-width: 768px) {
+        font-size: 18px;
+      }
     }
     
     p {
       margin: 0;
       color: #666;
       font-size: 14px;
+      
+      @media (max-width: 768px) {
+        font-size: 13px;
+      }
     }
   }
   
   .actions {
     display: flex;
     gap: 10px;
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      flex-wrap: wrap;
+      
+      .el-button {
+        flex: 1;
+        min-width: 80px;
+      }
+    }
   }
 }
 
@@ -775,6 +808,10 @@ onMounted(() => {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
     
     .el-input {
       flex: 1;

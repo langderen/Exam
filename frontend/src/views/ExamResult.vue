@@ -111,14 +111,33 @@ const getOptionKey = (opt) => {
 
 <style scoped lang="scss">
 .exam-result {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
+  
   .header {
     display: flex;
     align-items: center;
     gap: 15px;
+    margin-bottom: 20px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
     
     h2 {
       margin: 0;
       font-size: 18px;
+      
+      @media (max-width: 768px) {
+        font-size: 16px;
+      }
     }
   }
   
@@ -130,16 +149,29 @@ const getOptionKey = (opt) => {
       border-radius: 8px;
       margin-bottom: 30px;
       
+      @media (max-width: 768px) {
+        padding: 20px 15px;
+        margin-bottom: 20px;
+      }
+      
       .score {
         font-size: 48px;
         font-weight: bold;
         color: #409eff;
         margin-bottom: 15px;
+        
+        @media (max-width: 768px) {
+          font-size: 36px;
+        }
       }
       
       .stats p {
         color: #666;
         margin: 5px 0;
+        
+        @media (max-width: 768px) {
+          font-size: 14px;
+        }
       }
     }
     
@@ -147,6 +179,11 @@ const getOptionKey = (opt) => {
       h3 {
         margin-bottom: 20px;
         color: #333;
+        
+        @media (max-width: 768px) {
+          font-size: 16px;
+          margin-bottom: 15px;
+        }
       }
     }
     
@@ -158,6 +195,7 @@ const getOptionKey = (opt) => {
         align-items: center;
         gap: 10px;
         margin-bottom: 10px;
+        flex-wrap: wrap;
         
         .question-num {
           font-weight: bold;
@@ -170,6 +208,10 @@ const getOptionKey = (opt) => {
         line-height: 1.6;
         color: #333;
         margin-bottom: 15px;
+        
+        @media (max-width: 768px) {
+          font-size: 14px;
+        }
       }
       
       .options {

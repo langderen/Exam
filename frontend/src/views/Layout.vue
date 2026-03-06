@@ -3,13 +3,15 @@
     <el-container>
       <el-header class="header">
         <div class="logo">刷题8</div>
-        <el-menu mode="horizontal" :default-active="activeMenu" class="nav-menu" router>
+        
+        <el-menu mode="horizontal" :default-active="activeMenu" class="nav-menu" router v-show="!isMobile">
           <el-menu-item index="/home">首页</el-menu-item>
           <el-menu-item index="/books">习题册</el-menu-item>
           <el-menu-item index="/error">错题本</el-menu-item>
           <el-menu-item index="/collection">收藏夹</el-menu-item>
         </el-menu>
-        <div class="user-info">
+        
+        <div class="user-info" v-show="!isMobile">
           <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
             <el-button :icon="Bell" circle @click="showNotifications" />
           </el-badge>
@@ -26,10 +28,35 @@
             </template>
           </el-dropdown>
         </div>
+        
+        <el-button class="hamburger-btn" :icon="Menu" circle @click="toggleMobileMenu" v-show="isMobile" />
       </el-header>
+      
+      <el-drawer v-model="mobileMenuVisible" direction="rtl" size="280px" class="mobile-menu-drawer">
+        <div class="mobile-user-info" v-if="userStore.userInfo">
+          <div class="mobile-user-name">{{ userStore.userInfo.username }}</div>
+          <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="mobile-notification-badge">
+            <el-button :icon="Bell" circle @click="showNotifications" />
+          </el-badge>
+        </div>
+        <el-menu :default-active="activeMenu" router @select="closeMobileMenu">
+          <el-menu-item index="/home">首页</el-menu-item>
+          <el-menu-item index="/books">习题册</el-menu-item>
+          <el-menu-item index="/error">错题本</el-menu-item>
+          <el-menu-item index="/collection">收藏夹</el-menu-item>
+          <el-menu-item index="/profile">个人中心</el-menu-item>
+          <el-menu-item divided @click="handleLogout">退出登录</el-menu-item>
+        </el-menu>
+      </el-drawer>
+      
       <el-main class="main">
         <router-view />
-        
+        <footer class="footer">
+          <div class="footer-content">
+            <span>© 2026 刷题8 - 高效备考刷题平台</span>
+
+          </div>
+        </footer>
       </el-main>
     </el-container>
     
@@ -57,10 +84,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
-import { ArrowDown, Bell } from '@element-plus/icons-vue'
+import { ArrowDown, Bell, Menu } from '@element-plus/icons-vue'
 import { getNotifications, getUnreadCount, markAllAsRead, markAsRead } from '@/api/notification'
 
 const route = useRoute()
@@ -71,10 +98,30 @@ const activeMenu = computed(() => route.path)
 const notificationDrawer = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
+const isMobile = ref(false)
+const mobileMenuVisible = ref(false)
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+}
 
 onMounted(async () => {
   await loadUnreadCount()
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
+
+const toggleMobileMenu = () => {
+  mobileMenuVisible.value = !mobileMenuVisible.value
+}
+
+const closeMobileMenu = () => {
+  mobileMenuVisible.value = false
+}
 
 const loadUnreadCount = async () => {
   try {
@@ -145,6 +192,14 @@ const handleLogout = () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 0 20px;
   z-index: 100;
+
+  @media (max-width: 768px) {
+    padding: 0 10px;
+    flex-wrap: wrap;
+    height: auto !important;
+    min-height: 60px;
+    padding: 10px;
+  }
 }
 
 .logo {
@@ -152,17 +207,86 @@ const handleLogout = () => {
   font-weight: bold;
   color: #409eff;
   margin-right: 40px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+    margin-right: 10px;
+  }
 }
 
 .nav-menu {
   flex: 1;
   border-bottom: none;
+  
+  @media (max-width: 768px) {
+    order: 3;
+    width: 100%;
+    margin-top: 10px;
+    
+    .el-menu-item {
+      padding: 0 10px;
+      font-size: 13px;
+    }
+  }
+}
+
+.hamburger-btn {
+  margin-left: auto;
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
+.mobile-menu-drawer {
+  :deep(.el-drawer__body) {
+    padding: 0;
+  }
+  
+  .mobile-user-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    color: #fff;
+    
+    .mobile-user-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .mobile-notification-badge {
+      .el-button {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: transparent;
+        color: #fff;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+      }
+      
+      :deep(.el-badge__content) {
+        border: none;
+      }
+    }
+  }
+  
+  .el-menu {
+    border-right: none;
+  }
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 10px;
+  
+  @media (max-width: 768px) {
+    gap: 5px;
+  }
 }
 
 .user-dropdown {
@@ -182,20 +306,23 @@ const handleLogout = () => {
   padding: 20px;
   overflow-y: auto;
   min-height: calc(100vh - 60px);
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 }
 
 .footer {
-  background: #fff;
+
   padding: 15px 20px;
-  border-top: 1px solid #eee;
-  margin-top: 20px;
+  border-radius: 16px;
+  margin: 20px 10px;
+
   
   .footer-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #999;
-    font-size: 14px;
     
     a {
       color: #999;

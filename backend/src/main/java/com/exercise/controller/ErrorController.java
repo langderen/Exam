@@ -1,5 +1,6 @@
 package com.exercise.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.exercise.common.PageResult;
 import com.exercise.common.Result;
 import com.exercise.entity.QuestionRecord;
@@ -17,6 +18,7 @@ public class ErrorController {
     private QuestionRecordService questionRecordService;
     
     @GetMapping("/list")
+    @SaCheckLogin
     public Result<PageResult<QuestionRecord>> list(
             @RequestParam Long userId,
             @RequestParam(required = false) Long bookId,
@@ -28,12 +30,14 @@ public class ErrorController {
     }
     
     @DeleteMapping("/delete/{recordId}")
+    @SaCheckLogin
     public Result<Boolean> delete(@PathVariable Long recordId) {
         boolean success = questionRecordService.removeError(recordId);
         return success ? Result.success(true) : Result.error("删除失败");
     }
     
     @GetMapping("/high-error")
+    @SaCheckLogin
     public Result<List<QuestionRecord>> highError(
             @RequestParam Long userId,
             @RequestParam(defaultValue = "10") Integer limit) {
@@ -42,6 +46,7 @@ public class ErrorController {
     }
     
     @GetMapping("/recent")
+    @SaCheckLogin
     public Result<List<QuestionRecord>> recent(
             @RequestParam Long userId,
             @RequestParam(defaultValue = "10") Integer limit) {
