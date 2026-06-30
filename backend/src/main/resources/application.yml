@@ -55,6 +55,25 @@ ai:
     key: 
     model: qwen3:8b
 
+# 支付宝配置
+alipay:
+  # 应用ID
+  app-id: your_app_id
+  # 应用私钥
+  private-key: your_private_key
+  # 支付宝公钥
+  alipay-public-key: your_alipay_public_key
+  # 支付宝网关地址（沙箱环境使用 https://openapi-sandbox.dl.alipaydev.com/gateway.do）
+  gateway: https://openapi.alipay.com/gateway.do
+  # 签名类型
+  sign-type: RSA2
+  # 支付成功后的同步跳转地址
+  return-url: http://localhost:3000/payment/success
+  # 异步通知地址（必须是外网可访问的URL）
+  notify-url: http://localhost:8080/api/payment/notify
+  # 字符集
+  charset: utf-8
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.exercise.entity

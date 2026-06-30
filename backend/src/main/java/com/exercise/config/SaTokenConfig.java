@@ -23,7 +23,8 @@ public class SaTokenConfig implements WebMvcConfigurer {
                         "/book/listWithPurchasePaged",
                         "/book/all",
                         "/type/list",
-                        "/upload/**"
+                        "/upload/**",
+                        "/payment/notify"  // 支付宝异步通知接口，不需要登录验证
                 );
     }
 }

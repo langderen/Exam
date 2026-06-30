@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exercise.mapper.PaymentOrderMapper">
+    
+    <resultMap id="BaseResultMap" type="com.exercise.entity.PaymentOrder">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="subject" property="subject"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="trade_no" property="tradeNo"/>
+        <result column="status" property="status"/>
+        <result column="pay_method" property="payMethod"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, user_id, order_no, subject, total_amount, trade_no, status, pay_method, pay_time, create_time
+    </sql>
+    
+    <insert id="insert" parameterType="com.exercise.entity.PaymentOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment_order (
+            user_id, order_no, subject, total_amount, trade_no, status, pay_method, pay_time, create_time
+        ) VALUES (
+            #{userId}, #{orderNo}, #{subject}, #{totalAmount}, #{tradeNo}, #{status}, #{payMethod}, #{payTime}, #{createTime}
+        )
+    </insert>
+    
+    <select id="selectByOrderNo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM payment_order
+        WHERE order_no = #{orderNo}
+    </select>
+    
+    <select id="selectByTradeNo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM payment_order
+        WHERE trade_no = #{tradeNo}
+    </select>
+    
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM payment_order
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+    
+    <update id="updateStatus">
+        UPDATE payment_order
+        SET status = #{status}, trade_no = #{tradeNo}
+        WHERE order_no = #{orderNo}
+    </update>
+    
+</mapper>

@@ -199,6 +199,26 @@ CREATE TABLE `notification` (
     KEY `idx_is_read` (`is_read`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='通知表';
 
+-- ==================== 13. 支付订单表 ====================
+DROP TABLE IF EXISTS `payment_order`;
+CREATE TABLE `payment_order` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `order_no` VARCHAR(64) NOT NULL COMMENT '商户订单号',
+    `subject` VARCHAR(200) NOT NULL COMMENT '订单标题',
+    `total_amount` DECIMAL(10, 2) NOT NULL COMMENT '支付金额',
+    `trade_no` VARCHAR(128) DEFAULT NULL COMMENT '支付宝交易号',
+    `status` TINYINT DEFAULT 0 COMMENT '状态：0-待支付，1-已支付，2-已退款，3-已关闭',
+    `pay_method` VARCHAR(20) DEFAULT NULL COMMENT '支付方式：alipay-支付宝，wallet-钱包',
+    `pay_time` DATETIME DEFAULT NULL COMMENT '支付时间',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_order_no` (`order_no`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_trade_no` (`trade_no`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='支付订单表';
+
 /* 开启外键检查 */
 SET FOREIGN_KEY_CHECKS = 1;
 
